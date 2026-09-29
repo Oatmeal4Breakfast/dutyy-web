@@ -31,4 +31,23 @@ export async function apiRequest<T>(
     headers,
     credentials: "include",
   });
+
+  const nextCsrfToken = response.headers.get("X-CSRF-Token");
+  if (nextCsrfToken) csrfToken = nextCsrfToken;
+
+  if (response.status === 204) {
+    if (!response.ok) throw new ApiError(response.status, null);
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get("Content-Type") ?? "";
+  const body = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    throw new ApiError(response.status, body);
+  }
+
+  return body as T;
 }
