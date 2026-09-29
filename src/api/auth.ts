@@ -1,20 +1,5 @@
 import { apiRequest, clearCsrfToken } from "./client";
-
-export type UserSummary = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  status: string;
-};
-
-export type LoginResponse = { user_summary: UserSummary };
-
-export type SessionState = {
-  user_summary: UserSummary;
-  idle_expires_at: string;
-  absolute_expires_at: string;
-};
+import type { LoginResponse, SessionState } from "./types.ts";
 
 export function login(email: string, password: string): Promise<LoginResponse> {
   return apiRequest<LoginResponse>("/auth/login", {
@@ -35,12 +20,19 @@ export async function logout(): Promise<void> {
   clearCsrfToken();
 }
 
-export function resetPassword(
+export function setPassword(
   raw_token: string,
   new_password: string,
 ): Promise<void> {
   return apiRequest<void>("/auth/set-password", {
     method: "POST",
     body: JSON.stringify({ raw_token, new_password }),
+  });
+}
+
+export function resetPassword(email: string): Promise<void> {
+  return apiRequest<void>("/auth/request-password-reset", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }
