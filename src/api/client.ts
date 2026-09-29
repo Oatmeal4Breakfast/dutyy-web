@@ -1,9 +1,9 @@
-const API_ROOT = "/dutyy/API/v1";
+const API_ROOT = "/dutyy/api/v1";
 let csrfToken: string | null = null;
 
 export class ApiError extends Error {
   constructor(status: number, body: unknown) {
-    super(`API request failed with status ${status}`);
+    super(`API request failed with status ${status}\n${body}`);
   }
 }
 
