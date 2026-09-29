@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "dutyy/api/": {
+      "/dutyy/api": {
         target: "http://localhost:8000",
         changeOrigin: false,
       },
