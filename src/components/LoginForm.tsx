@@ -1,21 +1,21 @@
-import { useState, type FormEvent } from "react";
-import { login } from "../api/auth";
-import type { UserSummary } from "../api/types";
-import { ApiError } from "../api/client";
+import { useState, type SubmitEvent } from 'react';
+import { login } from '../api/auth';
+import type { UserSummary } from '../api/types';
+import { ApiError } from '../api/client';
 
 type LoginFormProps = {
   onLogin: (user: UserSummary) => void;
 };
 
 export default function LoginForm({ onLogin }: LoginFormProps) {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [submitting, setSubmit] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const cleanEmail = email.trim();
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setSubmit(true);
@@ -27,7 +27,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       if (error instanceof ApiError) {
         setError(error.message);
       } else {
-        setError("Unable to sign in");
+        setError('Unable to sign in');
       }
     } finally {
       setSubmit(false);
@@ -38,8 +38,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
     <div>
       <form onSubmit={handleSubmit}>
         <label htmlFor="email" id="email-label">
-          {" "}
-          Email{" "}
+          {' '}
+          Email{' '}
         </label>
         <input
           id="email"
@@ -49,8 +49,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           required
         />
         <label htmlFor="password" id="password-label">
-          {" "}
-          Password{" "}
+          {' '}
+          Password{' '}
         </label>
         <input
           id="password"
@@ -60,8 +60,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           required
         />
         <button type="submit" disabled={submitting}>
-          {" "}
-          {submitting ? "Signing in..." : "Sign In"}
+          {' '}
+          {submitting ? 'Signing in...' : 'Sign In'}
         </button>
         {error && <p role="alert">{error}</p>}
       </form>

@@ -1,4 +1,4 @@
-const API_ROOT = "/dutyy/api/v1";
+const API_ROOT = '/dutyy/api/v1';
 let csrfToken: string | null = null;
 
 export class ApiError extends Error {
@@ -11,28 +11,25 @@ export function clearCsrfToken() {
   csrfToken = null;
 }
 
-export async function apiRequest<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
+export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  const method = (init.method ?? "GET").toUpperCase();
+  const method = (init.method ?? 'GET').toUpperCase();
 
-  if (init.body && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
+  if (init.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
 
-  if (!["GET", "OPTIONS", "HEAD"].includes(method) && csrfToken) {
-    headers.set("X-CSRF-Token", csrfToken);
+  if (!['GET', 'OPTIONS', 'HEAD'].includes(method) && csrfToken) {
+    headers.set('X-CSRF-Token', csrfToken);
   }
 
   const response = await fetch(`${API_ROOT}${path}`, {
     ...init,
     headers,
-    credentials: "include",
+    credentials: 'include',
   });
 
-  const nextCsrfToken = response.headers.get("X-CSRF-Token");
+  const nextCsrfToken = response.headers.get('X-CSRF-Token');
   if (nextCsrfToken) csrfToken = nextCsrfToken;
 
   if (response.status === 204) {
@@ -40,8 +37,8 @@ export async function apiRequest<T>(
     return undefined as T;
   }
 
-  const contentType = response.headers.get("Content-Type") ?? "";
-  const body = contentType.includes("application/json")
+  const contentType = response.headers.get('Content-Type') ?? '';
+  const body = contentType.includes('application/json')
     ? await response.json()
     : await response.text();
 
