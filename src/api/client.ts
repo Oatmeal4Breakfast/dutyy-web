@@ -2,8 +2,17 @@ const API_ROOT = '/dutyy/api/v1';
 let csrfToken: string | null = null;
 
 export class ApiError extends Error {
+  status: number;
+  body: unknown;
   constructor(status: number, body: unknown) {
-    super(`API request failed with status ${status}\n${body}`);
+    super(`API request failed with status ${status}`);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+
+  getDetail() {
+    return this.body['detail'];
   }
 }
 

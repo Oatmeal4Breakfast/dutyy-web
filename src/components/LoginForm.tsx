@@ -10,7 +10,7 @@ type LoginFormProps = {
 export default function LoginForm({ onLogin }: LoginFormProps) {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [submitting, setSubmit] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const cleanEmail = email.trim();
@@ -18,7 +18,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    setSubmit(true);
+    setError(null);
+    setSubmitting(true);
 
     try {
       const response = await login(cleanEmail, password);
@@ -30,7 +31,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
         setError('Unable to sign in');
       }
     } finally {
-      setSubmit(false);
+      setSubmitting(false);
     }
   }
 
