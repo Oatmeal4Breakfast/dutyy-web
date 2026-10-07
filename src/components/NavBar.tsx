@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 
+import logo from '../assets/brand/logo.svg';
 import { logout } from '../api/auth';
 import { ApiError } from '../api/client';
 import type { UserSummary } from '../api/types';
@@ -9,15 +11,15 @@ type LogoutProps = {
   onLogout: () => void;
 };
 
-function LogoutButton({ btnStatus, onClick }: { btnStatus: boolean; onClick: () => void }) {
+function LogoutButton({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
       className="logout-button navbar-button"
       onClick={onClick}
-      disabled={btnStatus}
+      disabled={disabled}
     >
-      Logout
+      {disabled ? 'Logging out...' : 'Logout'}
     </button>
   );
 }
@@ -25,7 +27,7 @@ function LogoutButton({ btnStatus, onClick }: { btnStatus: boolean; onClick: () 
 function LoginLink() {
   return (
     <div className="login-div">
-      <a href="/login">Login</a>
+      <Link to="/login">Login</Link>
     </div>
   );
 }
@@ -54,8 +56,22 @@ export default function NavBar({ user, onLogout }: LogoutProps) {
 
   return (
     <div className="navbar">
-      <nav>
-        {user ? <div className='welcome-user'><p>Welcome {user.first_name}</p></div> <LogoutButton btnStatus={submitting} onClick={handleLogout} /> : <LoginLink />}
+      <nav aria-label="Primary navigation">
+        <Link to="/" className="navbar-brand">
+          <img src={logo} alt="Dutyy" />
+        </Link>
+        <div className="navbar-actions">
+          {user ? (
+            <>
+              <div className="welcome-user">
+                <p>Welcome {user.first_name}</p>
+              </div>
+              <LogoutButton disabled={submitting} onClick={handleLogout} />
+            </>
+          ) : (
+            <LoginLink />
+          )}
+        </div>
       </nav>
       {error && <p role="alert">{error}</p>}
     </div>

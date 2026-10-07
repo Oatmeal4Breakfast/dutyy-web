@@ -11,8 +11,12 @@ export class ApiError extends Error {
     this.body = body;
   }
 
-  getDetail() {
-    return this.body['detail'];
+  getDetail(): unknown {
+    if (typeof this.body !== 'object' || this.body === null || !('detail' in this.body)) {
+      return undefined;
+    }
+
+    return this.body.detail;
   }
 }
 
