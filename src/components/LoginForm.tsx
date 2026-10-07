@@ -15,7 +15,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
 
   const cleanEmail = email.trim();
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
 
     setError(null);
