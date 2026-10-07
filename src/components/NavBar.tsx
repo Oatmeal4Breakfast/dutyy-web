@@ -5,6 +5,7 @@ import logo from '../assets/brand/logo.svg';
 import { logout } from '../api/auth';
 import { ApiError } from '../api/client';
 import type { UserSummary } from '../api/types';
+import './NavBar.css';
 
 type LogoutProps = {
   user: UserSummary | null;
@@ -24,10 +25,15 @@ function LogoutButton({ disabled, onClick }: { disabled: boolean; onClick: () =>
   );
 }
 
-function LoginLink() {
+function GuestLinks() {
   return (
-    <div className="login-div">
-      <Link to="/login">Login</Link>
+    <div className="guest-links">
+      <Link to="/login" className="navbar-link">
+        Login
+      </Link>
+      <Link to="/signup" className="navbar-cta">
+        Create an account
+      </Link>
     </div>
   );
 }
@@ -69,7 +75,7 @@ export default function NavBar({ user, onLogout }: LogoutProps) {
               <LogoutButton disabled={submitting} onClick={handleLogout} />
             </>
           ) : (
-            <LoginLink />
+            <GuestLinks />
           )}
         </div>
       </nav>
