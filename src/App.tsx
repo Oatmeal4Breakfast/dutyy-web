@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import './App.css';
+import SetPasswordPage from './pages/SetPasswordPage';
 
 function App() {
   const [user, setUser] = useState<UserSummary | null>(null);
@@ -59,6 +60,7 @@ function App() {
           path="/dashboard"
           element={user ? <DashboardPage user={user} /> : <Navigate to="/login" replace />}
         />
+        <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
