@@ -1,5 +1,5 @@
 .landing-page,
-.login-page,
+.set-password-page .login-page,
 .signup-page,
 .dashboard-page {
   width: min(100%, var(--content-width));
