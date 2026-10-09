@@ -28,7 +28,7 @@ export async function logout(): Promise<void> {
   clearCsrfToken();
 }
 
-export function setPassword(raw_token: string, new_password: string): Promise<void> {
+export function setUserPassword(raw_token: string, new_password: string): Promise<void> {
   return apiRequest<void>('/auth/set-password', {
     method: 'POST',
     body: JSON.stringify({ raw_token, new_password }),
