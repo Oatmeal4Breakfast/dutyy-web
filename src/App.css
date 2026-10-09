@@ -1,5 +1,7 @@
 .landing-page,
-.set-password-page .login-page,
+.login-page,
+.set-password-page,
+.forgot-password-page,
 .signup-page,
 .dashboard-page {
   width: min(100%, var(--content-width));
@@ -153,6 +155,15 @@
   background: rgb(251 208 116 / 25%);
 }
 
+.auth-panel ul {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
 .auth-switch {
   margin-top: 2rem;
   padding-top: 1rem;
@@ -187,6 +198,8 @@
 @media (max-width: 48rem) {
   .landing-page,
   .login-page,
+  .set-password-page,
+  .forgot-password-page,
   .signup-page,
   .dashboard-page {
     min-height: calc(100svh - 4.5rem);

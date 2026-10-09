@@ -47,7 +47,7 @@ export default function ForgotPasswordForm() {
           {submitting ? 'Submitting...' : 'Reset Password'}
         </button>
         {error && <p role="alert">{error}</p>}
-        {sent && <p role="status">If an account exists for that email, check your inbox.</p>}
+        {sent && <p role="status">A reset link has been sent to that email.</p>}
       </form>
     </div>
   );
