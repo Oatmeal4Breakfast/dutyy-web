@@ -30,10 +30,12 @@ export default function SetPasswordForm({ token }: { token: string }) {
       try {
         await setUserPassword(token, password);
         setSuccess(true);
+        setPassword('');
+        setConfirm('');
       } catch (error) {
         if (error instanceof ApiError) {
           if (error.status === 400 || error.status === 404 || error.status === 410) {
-            setError('This link is invalid or expire. Request a new one');
+            setError('This link is invalid or expired. Request a new one');
             setLinkExpired(true);
           } else {
             setError(String(error.getDetail() ?? error.message));
@@ -98,9 +100,10 @@ export default function SetPasswordForm({ token }: { token: string }) {
         {error && <p role="alert">{error}</p>}
         {success && (
           <p role="status">
-            Password Set <Link to="/Login">Sign in</Link>
+            Password Set <Link to="/login">Sign in</Link>
           </p>
         )}
+        {linkExpired && <Link to="/forgot-password">Request new link</Link>}
       </form>
     </div>
   );

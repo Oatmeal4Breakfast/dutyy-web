@@ -19,6 +19,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <p className="auth-switch">
           Don&apos;t have an account? <Link to="/signup">Sign up</Link>
         </p>
+        <p>
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </p>
       </section>
     </main>
   );

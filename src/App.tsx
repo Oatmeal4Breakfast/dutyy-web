@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
+import './App.css';
 import { restoreSession } from './api/auth';
 import type { UserSummary } from './api/types';
 import NavBar from './components/NavBar';
@@ -7,7 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import './App.css';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SetPasswordPage from './pages/SetPasswordPage';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
           element={user ? <DashboardPage user={user} /> : <Navigate to="/login" replace />}
         />
         <Route path="/set-password" element={<SetPasswordPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
