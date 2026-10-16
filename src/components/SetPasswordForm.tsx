@@ -23,6 +23,7 @@ export default function SetPasswordForm({ token }: { token: string }) {
     e.preventDefault();
 
     setError(null);
+    setLinkExpired(false);
     setSubmitting(true);
     setSuccess(false);
 
@@ -30,15 +31,24 @@ export default function SetPasswordForm({ token }: { token: string }) {
       try {
         await setUserPassword(token, password);
         setSuccess(true);
+        setLinkExpired(false);
         setPassword('');
         setConfirm('');
       } catch (error) {
         if (error instanceof ApiError) {
-          if (error.status === 400 || error.status === 404 || error.status === 410) {
+          const raw = error.getDetail();
+          const detail = typeof raw === 'string' ? raw.toLowerCase() : '';
+          if (
+            [400, 404, 410].includes(error.status) ||
+            detail.includes('expir') ||
+            detail.includes('invalid') ||
+            detail.includes('not found') ||
+            detail.includes('token')
+          ) {
             setError('This link is invalid or expired. Request a new one');
             setLinkExpired(true);
           } else {
-            setError(String(error.getDetail() ?? error.message));
+            setError(typeof raw === 'string' ? raw : error.message);
           }
         } else {
           setError('Unable to set password');
@@ -48,6 +58,7 @@ export default function SetPasswordForm({ token }: { token: string }) {
       }
     } else {
       setSubmitting(false);
+      setError('Invalid password. Check requirements');
     }
   }
 
