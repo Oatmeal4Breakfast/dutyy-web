@@ -1,22 +1,11 @@
 import { apiRequest } from './client';
-import type { Project, ProjectStatus, Dutyy, DutyyStatus } from './types';
-
-export type createDutyyRequest = {
-  title: string;
-  details: string | null;
-};
-
-export type patchDutyyRequest = {
-  title: string | null;
-  status: DutyyStatus | null;
-  details: string | null;
-};
-
-export type updateProjectRequest = {
-  projectId: string;
-  name: string | null;
-  status: ProjectStatus | null;
-};
+import type {
+  Project,
+  Dutyy,
+  CreateDutyyRequest,
+  PatchDutyyRequest,
+  UpdateProjectRequest,
+} from './types';
 
 export function getProjects(): Promise<Project[]> {
   return apiRequest<Project[]>('/projects', {
@@ -39,15 +28,15 @@ export function createProject(projectName: string): Promise<Project> {
   });
 }
 
-export function updateProject(payload: updateProjectRequest): Promise<Project> {
+export function patchProject(projectId: string, payload: UpdateProjectRequest): Promise<Project> {
   const hasValue: boolean = [payload.name, payload.status].some(
-    (p) => p !== null && p !== undefined && p !== '',
+    (p) => p !== null && p !== undefined && p.trim() !== '',
   );
   if (!hasValue) {
     throw new Error('No fields provided to update');
   }
 
-  return apiRequest(`/projects/${encodeURIComponent(payload.projectId)}`, {
+  return apiRequest(`/projects/${encodeURIComponent(projectId)}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
@@ -59,29 +48,29 @@ export function publishProject(projectId: string): Promise<void> {
   });
 }
 
-export function unpublishProject(projectId: string): Promise<void> {
+export function unpublishProject(projectId: string): Promise<Project> {
   return apiRequest(`/projects/${encodeURIComponent(projectId)}/unpublish`, {
-    method: 'POST"',
+    method: 'POST',
   });
 }
 
-export function addDutyy(projectId: string, dutyy: createDutyyRequest): Promise<Dutyy> {
+export function addDutyy(projectId: string, dutyy: CreateDutyyRequest): Promise<Dutyy> {
   return apiRequest(`/projects/${encodeURIComponent(projectId)}/dutyys`, {
     method: 'POST',
     body: JSON.stringify(dutyy),
   });
 }
 
-export function patchDutyy(dutyyId: string, patch: patchDutyyRequest): Promise<Dutyy> {
+export function patchDutyy(dutyyId: string, patch: PatchDutyyRequest): Promise<Dutyy> {
   const hasValue: boolean = [patch.title, patch.details, patch.status].some(
-    (p) => p !== null || p !== undefined || p !== '',
+    (p) => p !== null && p !== undefined && p.trim() !== '',
   );
 
   if (!hasValue) {
     throw new Error('No fields provided to update');
   }
   return apiRequest(`/dutyys/${encodeURIComponent(dutyyId)}`, {
-    method: 'POST',
+    method: 'PATCH',
     body: JSON.stringify(patch),
   });
 }
@@ -90,7 +79,7 @@ export function deleteDutyy(projectId: string, dutyyId: string): Promise<void> {
   return apiRequest(
     `/projects/${encodeURIComponent(projectId)}/dutyys/${encodeURIComponent(dutyyId)}`,
     {
-      method: 'POST',
+      method: 'DELETE',
     },
   );
 }

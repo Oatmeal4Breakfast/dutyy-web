@@ -1,6 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
-import { createUser, type UserSignUpRequest } from '../api/users';
+import { createUser } from '../api/users';
 import { ApiError } from '../api/client';
+import type { UserSignUpRequest } from '../api/types';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<UserSignUpRequest>({

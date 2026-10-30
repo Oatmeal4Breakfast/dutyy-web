@@ -1,17 +1,5 @@
 import { apiRequest } from './client';
-import { type UserSummary } from './types';
-
-export type UserSignUpRequest = {
-  first_name: string;
-  last_name: string;
-  email: string;
-};
-
-export type UserUpdateRequest = {
-  first_name?: string | null;
-  last_name?: string | null;
-  email?: string | null;
-};
+import type { UserSummary, UserSignUpRequest, UserUpdateRequest } from './types';
 
 export function createUser(payload: UserSignUpRequest): Promise<UserSummary> {
   return apiRequest<UserSummary>('/users', {
