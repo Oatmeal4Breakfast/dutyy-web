@@ -1,4 +1,4 @@
-import type { UserSummary } from '../api/types';
+import type { UserSummary } from '../api/users';
 
 type DashboardPageProps = {
   user: UserSummary;

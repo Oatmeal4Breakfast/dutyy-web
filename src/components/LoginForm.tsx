@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react';
 import { login } from '../api/auth';
-import type { UserSummary } from '../api/types';
+import type { UserSummary } from '../api/users';
 import { ApiError } from '../api/client';
 
 type LoginFormProps = {

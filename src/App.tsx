@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import './App.css';
 import { restoreSession } from './api/auth';
-import type { UserSummary } from './api/types';
+import type { UserSummary } from './api/users';
 import NavBar from './components/NavBar';
 import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';

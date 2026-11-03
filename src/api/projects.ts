@@ -1,12 +1,55 @@
 import { apiRequest } from './client';
-import type {
-  Project,
-  Dutyy,
-  CreateDutyyRequest,
-  PatchDutyyRequest,
-  UpdateProjectRequest,
-  CreateProjectRequest,
-} from './types';
+
+export type ProjectStatus = 'new' | 'in_progress' | 'complete' | 'abandoned';
+
+export type PublishingStatus = 'draft' | 'published';
+
+export type DutyyStatus = 'new' | 'in_progress' | 'complete';
+
+export type CreateProjectRequest = {
+  name: string;
+  dutyys?: CreateDutyyRequest[];
+};
+
+export type CreateDutyyRequest = {
+  title: string;
+  details?: string | null;
+};
+
+export type PatchDutyyRequest = {
+  title?: string | null;
+  status?: DutyyStatus | null;
+  details?: string | null;
+};
+
+export type UpdateProjectRequest = {
+  name?: string | null;
+  status?: ProjectStatus | null;
+};
+
+export type Dutyy = {
+  id: string;
+  title: string;
+  details: string | null;
+  status: DutyyStatus;
+  project_id: string;
+  created_date: string;
+  modified_date: string | null;
+  completed_date: string | null;
+};
+
+export type Project = {
+  id: string;
+  name: string;
+  owner_id: string;
+  status: ProjectStatus;
+  publishing_status: PublishingStatus;
+  created_date: string;
+  modified_date: string | null;
+  published_date: string | null;
+  completed_date: string | null;
+  dutyys: Dutyy[];
+};
 
 export function getProjects(): Promise<Project[]> {
   return apiRequest<Project[]>('/projects', {

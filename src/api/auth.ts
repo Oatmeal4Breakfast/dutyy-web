@@ -1,5 +1,5 @@
 import { apiRequest, clearCsrfToken } from './client';
-import type { UserSummary } from './types.ts';
+import type { UserSummary } from './users';
 
 export type LoginResponse = { user_summary: UserSummary };
 

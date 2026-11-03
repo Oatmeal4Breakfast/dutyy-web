@@ -1,5 +1,26 @@
 import { apiRequest } from './client';
-import type { APIKeyResponse, NewKeyRequest, APIKey } from './types';
+
+export type APIKeyStatus = 'active' | 'inactive';
+
+export type TTL = '7d' | '30d' | '90d' | '1y';
+
+export type NewKeyRequest = {
+  key_name: string;
+  ttl: TTL;
+};
+
+export type APIKeyResponse = {
+  id: string;
+  name: string;
+  status: APIKeyStatus;
+  created_date: string;
+  last_used: string | null;
+  expires_at: string | null;
+};
+
+export type APIKey = {
+  'api-key': string;
+};
 
 export function getApiKeys(): Promise<APIKeyResponse[]> {
   return apiRequest('/api-keys', {

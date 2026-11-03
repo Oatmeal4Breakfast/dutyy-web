@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import logo from '../assets/brand/logo.svg';
 import { logout } from '../api/auth';
 import { ApiError } from '../api/client';
-import type { UserSummary } from '../api/types';
+import type { UserSummary } from '../api/users';
 import './NavBar.css';
 
 type LogoutProps = {

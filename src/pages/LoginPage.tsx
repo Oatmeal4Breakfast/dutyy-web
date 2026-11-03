@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import type { UserSummary } from '../api/types';
+import type { UserSummary } from '../api/users';
 import LoginForm from '../components/LoginForm';
 
 type LoginPageProps = {

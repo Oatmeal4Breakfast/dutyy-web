@@ -1,5 +1,29 @@
 import { apiRequest } from './client';
-import type { UserSummary, UserSignUpRequest, UserUpdateRequest } from './types';
+
+export type UserStatus = 'active' | 'inactive' | 'blocked';
+
+export type UserSignUpRequest = {
+  first_name: string;
+  last_name: string;
+  email: string;
+};
+
+export type UserUpdateRequest = {
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+};
+
+export type UserSummary = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  status: UserStatus;
+  last_login: string | null;
+  modified_date: string | null;
+  created_date: string;
+};
 
 export function createUser(payload: UserSignUpRequest): Promise<UserSummary> {
   return apiRequest<UserSummary>('/users', {
