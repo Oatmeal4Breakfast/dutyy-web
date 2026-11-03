@@ -18,6 +18,11 @@ export type PublishingStatus = 'draft' | 'published';
 
 export type DutyyStatus = 'new' | 'in_progress' | 'complete';
 
+export type CreateProjectRequest = {
+  name: string;
+  dutyys?: CreateDutyyRequest[];
+};
+
 export type CreateDutyyRequest = {
   title: string;
   details?: string | null;

@@ -5,6 +5,7 @@ import type {
   CreateDutyyRequest,
   PatchDutyyRequest,
   UpdateProjectRequest,
+  CreateProjectRequest,
 } from './types';
 
 export function getProjects(): Promise<Project[]> {
@@ -19,12 +20,10 @@ export function getProjectById(projectId: string): Promise<Project> {
   });
 }
 
-export function createProject(projectName: string): Promise<Project> {
+export function createProject(payload: CreateProjectRequest): Promise<Project> {
   return apiRequest<Project>('/projects', {
     method: 'POST',
-    body: JSON.stringify({
-      name: projectName,
-    }),
+    body: JSON.stringify(payload),
   });
 }
 
