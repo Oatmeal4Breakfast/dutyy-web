@@ -73,7 +73,7 @@ export default function CreateProjectForm() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form className="create-project-form" onSubmit={handleSubmit}>
         <label htmlFor="name">Project Name</label>
         <input
           id="name"
@@ -88,7 +88,11 @@ export default function CreateProjectForm() {
           const detailsId = `${dutyy.clientId}-details`;
 
           return (
-            <fieldset key={dutyy.clientId} disabled={submitting}>
+            <fieldset
+              key={dutyy.clientId}
+              className="create-project-form__dutyy"
+              disabled={submitting}
+            >
               <legend>Dutyy {index + 1}</legend>
 
               <label htmlFor={titleId}>Title</label>
@@ -106,17 +110,26 @@ export default function CreateProjectForm() {
                 onChange={(e) => updateDutyy(dutyy.clientId, 'details', e.target.value)}
               />
 
-              <button type="button" onClick={() => removeDutyy(dutyy.clientId)}>
+              <button
+                type="button"
+                className="create-project-form__remove"
+                onClick={() => removeDutyy(dutyy.clientId)}
+              >
                 Remove dutyy
               </button>
             </fieldset>
           );
         })}
 
-        <button type="button" onClick={addDutyy} disabled={submitting}>
+        <button
+          type="button"
+          className="create-project-form__add"
+          onClick={addDutyy}
+          disabled={submitting}
+        >
           Add a dutyy
         </button>
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="create-project-form__submit" disabled={submitting}>
           {submitting ? 'Creating new project...' : 'Create Project'}
         </button>
 
