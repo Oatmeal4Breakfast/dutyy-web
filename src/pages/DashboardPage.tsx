@@ -7,7 +7,7 @@ type DashboardPageProps = {
 };
 
 export default function DashboardPage({ user }: DashboardPageProps) {
-  const [showCreateProjectButton, setShowCreateProjectButton] = useState<boolean>(false);
+  const [showCreateProjectForm, setShowCreateProjectForm] = useState<boolean>(false);
 
   return (
     <main className="dashboard-page">
@@ -15,16 +15,17 @@ export default function DashboardPage({ user }: DashboardPageProps) {
       <p>Welcome, {user.first_name}.</p>
       <button
         type="button"
-        aria-expanded={showCreateProjectButton}
+        className="dashboard-project-toggle"
+        aria-expanded={showCreateProjectForm}
         aria-controls="create-project-panel"
-        onClick={() => setShowCreateProjectButton(!showCreateProjectButton)}
+        onClick={() => setShowCreateProjectForm((isVisible) => !isVisible)}
       >
-        {showCreateProjectButton ? 'Close Form' : 'New Project'}
+        {showCreateProjectForm ? 'Close Form' : 'New Project'}
       </button>
-      {showCreateProjectButton && (
+      {showCreateProjectForm && (
         <section id="create-project-panel" className="create-project-panel">
           <h2>Create Project</h2>
-          <CreateProjectForm></CreateProjectForm>
+          <CreateProjectForm />
         </section>
       )}
     </main>
