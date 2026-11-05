@@ -14,6 +14,7 @@ export default function DashboardPage({ user }: DashboardPageProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
+  const [projectLoadAttempt, setProjectLoadAttempt] = useState<number>(0);
 
   useEffect(() => {
     let active = true;
@@ -46,7 +47,7 @@ export default function DashboardPage({ user }: DashboardPageProps) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [projectLoadAttempt]);
 
   return (
     <main className="dashboard-page">
@@ -64,7 +65,11 @@ export default function DashboardPage({ user }: DashboardPageProps) {
       {showCreateProjectForm && (
         <section id="create-project-panel" className="create-project-panel">
           <h2>Create Project</h2>
-          <CreateProjectForm />
+          <CreateProjectForm
+            onCreated={(project) => {
+              setProjects((current) => [...current, project]);
+            }}
+          />
         </section>
       )}
 
@@ -75,7 +80,19 @@ export default function DashboardPage({ user }: DashboardPageProps) {
             Loading Projects
           </p>
         )}
-        {!loadingProjects && projectsError && <p role="alert">{projectsError}</p>}
+        {!loadingProjects && projectsError && (
+          <div>
+            <p role="alert">{projectsError}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setProjectLoadAttempt((current) => current + 1);
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        )}
         {!loadingProjects && !projectsError && projects.length === 0 && <p>No projects yet.</p>}
         {!loadingProjects && !projectsError && projects.length > 0 && (
           <ul>

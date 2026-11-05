@@ -12,3 +12,8 @@ dev:
 # Stop the backend development containers.
 down:
     docker compose -f compose.dev.yml down
+
+# Create pull request
+pr:
+  gh pr create --fill
+
