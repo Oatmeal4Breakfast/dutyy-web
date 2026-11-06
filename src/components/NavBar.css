@@ -36,20 +36,6 @@
   gap: clamp(0.75rem, 2vw, 2rem);
 }
 
-.welcome-user {
-  padding-right: 1.5rem;
-  border-right: 1px solid var(--rule);
-}
-
-.welcome-user p {
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 .navbar-link,
 .navbar-cta,
 .navbar-button {
@@ -80,6 +66,17 @@
 .navbar-link {
   color: var(--ink);
   background: transparent;
+}
+
+.navbar-dashboard-link {
+  border: 0;
+}
+
+.navbar-link--active {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-thickness: 0.15em;
+  text-underline-offset: 0.35em;
 }
 
 .navbar-cta {
@@ -150,10 +147,6 @@
 
   .navbar-actions {
     grid-column: 2;
-  }
-
-  .welcome-user {
-    display: none;
   }
 
   .navbar-link,

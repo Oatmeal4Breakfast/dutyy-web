@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, NavLink } from 'react-router';
 
 import logo from '../assets/brand/logo.svg';
 import { logout } from '../api/auth';
@@ -69,9 +69,15 @@ export default function NavBar({ user, onLogout }: LogoutProps) {
         <div className="navbar-actions">
           {user ? (
             <>
-              <div className="welcome-user">
-                <p>Welcome {user.first_name}</p>
-              </div>
+              <NavLink
+                to="/dashboard"
+                end
+                className={({ isActive }) =>
+                  `navbar-link navbar-dashboard-link${isActive ? ' navbar-link--active' : ''}`
+                }
+              >
+                Dashboard
+              </NavLink>
               <LogoutButton disabled={submitting} onClick={handleLogout} />
             </>
           ) : (
