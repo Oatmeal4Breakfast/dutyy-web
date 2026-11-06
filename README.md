@@ -1,4 +1,7 @@
-# <img src="./src/assets/brand/logo.svg" alt="Dutyy logo" width="48"> Dutyy
+<div align="center">
+  <img src="./src/assets/brand/logo.svg" alt="Dutyy logo" width="112">
+  <h1><em>Dutyy</em></h1>
+</div>
 
 ## About the project
 
