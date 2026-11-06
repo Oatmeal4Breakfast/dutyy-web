@@ -4,6 +4,7 @@ import type { Project } from '../api/projects';
 import { getProjects } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { ApiError } from '../api/client';
+import ProjectsList from '../components/ProjectsList';
 
 type DashboardPageProps = {
   user: UserSummary;
@@ -95,11 +96,7 @@ export default function DashboardPage({ user }: DashboardPageProps) {
         )}
         {!loadingProjects && !projectsError && projects.length === 0 && <p>No projects yet.</p>}
         {!loadingProjects && !projectsError && projects.length > 0 && (
-          <ul>
-            {projects.map((project) => (
-              <li key={project.id}>{project.name}</li>
-            ))}
-          </ul>
+          <ProjectsList projects={projects}></ProjectsList>
         )}
       </section>
     </main>
