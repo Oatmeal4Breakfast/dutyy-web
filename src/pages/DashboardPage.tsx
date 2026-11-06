@@ -52,30 +52,29 @@ export default function DashboardPage({ user }: DashboardPageProps) {
 
   return (
     <main className="dashboard-page">
-      <h1>Dashboard</h1>
-      <p>Welcome, {user.first_name}.</p>
-      <button
-        type="button"
-        className="dashboard-project-toggle"
-        aria-expanded={showCreateProjectForm}
-        aria-controls="create-project-panel"
-        onClick={() => setShowCreateProjectForm((isVisible) => !isVisible)}
-      >
-        {showCreateProjectForm ? 'Close Form' : 'New Project'}
-      </button>
-      {showCreateProjectForm && (
-        <section id="create-project-panel" className="create-project-panel">
-          <h2>Create Project</h2>
-          <CreateProjectForm
-            onCreated={(project) => {
-              setProjects((current) => [...current, project]);
-            }}
-          />
-        </section>
-      )}
-
       <section className="projects-heading" aria-labelledby="projects-heading">
-        <h2 id="projects-heading">Projects</h2>
+        <div className="projects-heading__header">
+          <h1 id="projects-heading">Projects</h1>
+          <button
+            type="button"
+            className="dashboard-project-toggle"
+            aria-expanded={showCreateProjectForm}
+            aria-controls="create-project-panel"
+            onClick={() => setShowCreateProjectForm((isVisible) => !isVisible)}
+          >
+            {showCreateProjectForm ? 'Close Form' : 'New Project'}
+          </button>
+          {showCreateProjectForm && (
+            <section id="create-project-panel" className="create-project-panel">
+              <h2>Create Project</h2>
+              <CreateProjectForm
+                onCreated={(project) => {
+                  setProjects((current) => [...current, project]);
+                }}
+              />
+            </section>
+          )}
+        </div>
         {loadingProjects && (
           <p className="loading-projects-status" role="status">
             Loading Projects
