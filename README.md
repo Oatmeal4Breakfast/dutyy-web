@@ -1,6 +1,4 @@
-![Dutyy Wordmark](./src/assets/brand/logo.svg)
-
-# Dutyy
+# <img src="./src/assets/brand/logo.svg" alt="Dutyy logo" width="48"> Dutyy
 
 ## About the project
 
