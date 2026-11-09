@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
 import type { Project } from '../api/projects';
+import ProjectRow from './ProjectRow';
 
 type SortKey = 'status' | 'activity' | 'name';
 
@@ -58,17 +59,14 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
               const completedDutyys = project.dutyys.filter(
                 (dutyy) => dutyy.status === 'complete',
               ).length;
-
+              const lastActivity = getLastActivity(project);
               return (
-                <tr key={project.id}>
-                  <td>{project.name}</td>
-                  <td>{project.status}</td>
-                  <td>
-                    {completedDutyys} of {project.dutyys.length}
-                  </td>
-                  <td>{project.publishing_status}</td>
-                  <td>{getLastActivity(project)}</td>
-                </tr>
+                <ProjectRow
+                  key={project.id}
+                  project={project}
+                  completed={completedDutyys}
+                  lastActivity={lastActivity}
+                />
               );
             })}
           </tbody>
