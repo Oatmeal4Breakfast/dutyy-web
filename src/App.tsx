@@ -59,7 +59,7 @@ function App() {
         />
         <Route
           path="/dashboard"
-          element={user ? <DashboardPage user={user} /> : <Navigate to="/login" replace />}
+          element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
         />
         <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
