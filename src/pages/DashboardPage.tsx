@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react';
-import type { UserSummary } from '../api/users';
 import type { Project } from '../api/projects';
 import { getProjects } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { ApiError } from '../api/client';
 import ProjectsList from '../components/ProjectsList';
 
-type DashboardPageProps = {
-  user: UserSummary;
-};
-
-export default function DashboardPage({ user }: DashboardPageProps) {
+export default function DashboardPage() {
   const [showCreateProjectForm, setShowCreateProjectForm] = useState<boolean>(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
