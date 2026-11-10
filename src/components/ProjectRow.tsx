@@ -1,17 +1,47 @@
 import { useState } from 'react';
-import type { Project } from '../api/projects';
 import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
+
+import { patchProject } from '../api/projects';
+import type { Project } from '../api/projects';
 import './ProjectRow.css';
+import { ApiError } from '../api/client';
 
 type ProjectRowProps = {
   project: Project;
   completed: number;
   lastActivity: string;
+  onProjectChanged: (projectId: string) => Promise<void>;
 };
 
-export default function ProjectRow({ project, completed, lastActivity }: ProjectRowProps) {
+export default function ProjectRow({
+  project,
+  completed,
+  lastActivity,
+  onProjectChanged,
+}: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
+  const [isCompleting, setIsCompleting] = useState<boolean>(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
   const dutyysId = `project-${project.id}-dutyys`;
+
+  async function handleCompleteProject(): Promise<void> {
+    setIsCompleting(true);
+    setActionError(null);
+
+    try {
+      await patchProject(project.id, { status: 'complete' });
+      await onProjectChanged(project.id);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setActionError(error.message);
+      } else {
+        setActionError('Unable to complete project');
+      }
+    } finally {
+      setIsCompleting(false);
+    }
+  }
 
   return (
     <>
@@ -37,9 +67,9 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
         </td>
         <td>{project.publishing_status}</td>
         <td>{lastActivity}</td>
-        <td>
+        <td className="project-row__action-cell">
           <div
-            className="project-row__action-cell"
+            className="project-row__actions"
             role="group"
             aria-label={`Actions for ${project.name}`}
           >
@@ -47,6 +77,8 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
               type="button"
               className="project-action-button"
               aria-label={`Complete ${project.name}`}
+              onChange={() => void handleCompleteProject()}
+              disabled={isCompleting || project.status === 'complete'}
             >
               <Check aria-hidden="true" />
             </button>
@@ -62,18 +94,22 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
               className="project-action-button"
               aria-label={`Edit ${project.name}`}
             >
-              <SquarePen aria-label="edit-project" />
+              <SquarePen aria-hidden="true" />
             </button>
             <button
               type="button"
               className="project-action-button"
               aria-label={`More actions for ${project.name}`}
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
             >
-              <Ellipsis aria-label="action-menu" />
+              <Ellipsis aria-hidden="true" />
             </button>
           </div>
         </td>
       </tr>
+      {actionError && <p role="alert">{actionError}</p>}
       {isExpanded && (
         <tr id={dutyysId} className="project-dutyys-row">
           <td colSpan={6} className="project-dutyys-cell">
