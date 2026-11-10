@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Project } from '../api/projects';
+import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
 
 type ProjectRowProps = {
   project: Project;
@@ -24,12 +25,7 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
               aria-label={`${isExpanded ? 'Hide' : 'Show'} dutyys for ${project.name}`}
               onClick={() => setExpanded((current) => !current)}
             >
-              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                <path
-                  fill="currentColor"
-                  d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"
-                />
-              </svg>
+              <ChevronDown />
             </button>
             <span>{project.name}</span>
           </span>
@@ -40,10 +36,46 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
         </td>
         <td>{project.publishing_status}</td>
         <td>{lastActivity}</td>
+        <td>
+          <div
+            className="project-row__action-cell"
+            role="group"
+            aria-label={`Actions for ${project.name}`}
+          >
+            <button
+              type="button"
+              className="project-action-button"
+              aria-label={`Complete ${project.name}`}
+            >
+              <Check aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="project-action-button"
+              aria-label={`Add dutyy to ${project.name}`}
+            >
+              <Plus aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="project-action-button"
+              aria-label={`Edit ${project.name}`}
+            >
+              <SquarePen aria-label="edit-project" />
+            </button>
+            <button
+              type="button"
+              className="project-action-button"
+              aria-label={`More actions for ${project.name}`}
+            >
+              <Ellipsis aria-label="action-menu" />
+            </button>
+          </div>
+        </td>
       </tr>
       {isExpanded && (
         <tr id={dutyysId} className="project-dutyys-row">
-          <td colSpan={5} className="project-dutyys-cell">
+          <td colSpan={6} className="project-dutyys-cell">
             {project.dutyys.length > 0 ? (
               <ul className="project-dutyys-list">
                 {project.dutyys.map((dutyy) => (

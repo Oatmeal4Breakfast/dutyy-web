@@ -52,6 +52,9 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
               <th scope="col">Progress</th>
               <th scope="col">Publishing</th>
               <th scope="col">Last activity</th>
+              <th scope="col" className="projects-table__actions-heading">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
