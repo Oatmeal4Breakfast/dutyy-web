@@ -54,6 +54,10 @@
   vertical-align: middle;
 }
 
+.project-table .projects-table__actions-heading {
+  text-align: right;
+}
+
 .projects-table th {
   color: var(--muted);
   font-size: 0.7rem;

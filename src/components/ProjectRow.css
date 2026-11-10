@@ -94,6 +94,51 @@
   line-height: 1.5;
 }
 
+.project-row__action-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.project-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.project-action-button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.4rem;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+
+.project-action-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.projct-action-button:hover {
+  color: var(--blue);
+  background: rgb(54 89 235 / 8%);
+}
+
+.project-action-button:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.project-action-button:disabled {
+  color: var(--muted);
+  opacity: 0.55;
+  cursor: wait;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .project-row,
   .project-row-toggle svg {
