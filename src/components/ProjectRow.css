@@ -123,7 +123,7 @@
   height: 1rem;
 }
 
-.projct-action-button:hover {
+.project-action-button:hover {
   color: var(--blue);
   background: rgb(54 89 235 / 8%);
 }
@@ -136,6 +136,10 @@
 .project-action-button:disabled {
   color: var(--muted);
   opacity: 0.55;
+  cursor: default;
+}
+
+.project-action-button--pending:disabled {
   cursor: wait;
 }
 
