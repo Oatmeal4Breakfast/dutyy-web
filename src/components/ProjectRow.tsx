@@ -1,43 +1,30 @@
 import { useState } from 'react';
 import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
-
-import { patchProject } from '../api/projects';
 import type { Project } from '../api/projects';
 import './ProjectRow.css';
-import { ApiError } from '../api/client';
 
 type ProjectRowProps = {
   project: Project;
   completed: number;
   lastActivity: string;
-  onProjectChanged: (projectId: string) => Promise<void>;
+  actions: ProjectActions;
 };
 
-export default function ProjectRow({
-  project,
-  completed,
-  lastActivity,
-  onProjectChanged,
-}: ProjectRowProps) {
+export type ProjectActions = {
+  completeProject: (projectId: string) => Promise<void>;
+};
+
+export default function ProjectRow({ project, completed, lastActivity, actions }: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
-  const [isCompleting, setIsCompleting] = useState<boolean>(false);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
+  const [isCompleting, setIsCompleting] = useState<boolean>(false);
   const dutyysId = `project-${project.id}-dutyys`;
 
   async function handleCompleteProject(): Promise<void> {
     setIsCompleting(true);
-    setActionError(null);
 
     try {
-      await patchProject(project.id, { status: 'complete' });
-      await onProjectChanged(project.id);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setActionError(error.message);
-      } else {
-        setActionError('Unable to complete project');
-      }
+      await actions.completeProject(project.id);
     } finally {
       setIsCompleting(false);
     }
@@ -75,9 +62,9 @@ export default function ProjectRow({
           >
             <button
               type="button"
-              className="project-action-button"
+              className={`project-action-button ${isCompleting ? 'project-action-button--pending' : ''}`}
               aria-label={`Complete ${project.name}`}
-              onChange={() => void handleCompleteProject()}
+              onClick={() => void handleCompleteProject()}
               disabled={isCompleting || project.status === 'complete'}
             >
               <Check aria-hidden="true" />
@@ -109,7 +96,6 @@ export default function ProjectRow({
           </div>
         </td>
       </tr>
-      {actionError && <p role="alert">{actionError}</p>}
       {isExpanded && (
         <tr id={dutyysId} className="project-dutyys-row">
           <td colSpan={6} className="project-dutyys-cell">

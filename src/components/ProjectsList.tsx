@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
 import type { Project } from '../api/projects';
+import type { ProjectActions } from './ProjectRow';
 import ProjectRow from './ProjectRow';
 import './ProjectsList.css';
 
@@ -7,9 +8,10 @@ type SortKey = 'status' | 'activity' | 'name';
 
 type ProjectsListProps = {
   projects: Project[];
+  actions: ProjectActions;
 };
 
-export default function ProjectsList({ projects }: ProjectsListProps) {
+export default function ProjectsList({ projects, actions }: ProjectsListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('status');
 
   function getLastActivity(project: Project): string {
@@ -70,6 +72,7 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
                   project={project}
                   completed={completedDutyys}
                   lastActivity={lastActivity}
+                  actions={actions}
                 />
               );
             })}

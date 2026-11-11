@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Project } from '../api/projects';
-import { getProjects } from '../api/projects';
+import { getProjectById, getProjects, patchProject } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { ApiError } from '../api/client';
 import ProjectsList from '../components/ProjectsList';
+import type { ProjectActions } from '../components/ProjectRow';
 
 export default function DashboardPage() {
   const [showCreateProjectForm, setShowCreateProjectForm] = useState<boolean>(false);
@@ -11,6 +12,7 @@ export default function DashboardPage() {
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
   const [projectLoadAttempt, setProjectLoadAttempt] = useState<number>(0);
+  const [actionsError, setActionsError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -44,6 +46,35 @@ export default function DashboardPage() {
       active = false;
     };
   }, [projectLoadAttempt]);
+
+  async function refreshProject(projectId: string): Promise<void> {
+    const updatedProject = await getProjectById(projectId);
+
+    setProjects((current) =>
+      current.map((project) => (project.id === updatedProject.id ? updatedProject : project)),
+    );
+  }
+
+  async function completeProject(projectId: string): Promise<void> {
+    setActionsError(null);
+
+    try {
+      await patchProject(projectId, { status: 'complete' });
+      await refreshProject(projectId);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setActionsError(error.message);
+      } else {
+        setActionsError('Could not mark project as complete');
+      }
+    }
+  }
+
+  const projectActions: ProjectActions = {
+    completeProject,
+  };
+
+  const activeProjects = projects.filter((project) => project.status !== 'complete');
 
   return (
     <main className="dashboard-page">
@@ -90,8 +121,9 @@ export default function DashboardPage() {
         )}
         {!loadingProjects && !projectsError && projects.length === 0 && <p>No projects yet.</p>}
         {!loadingProjects && !projectsError && projects.length > 0 && (
-          <ProjectsList projects={projects}></ProjectsList>
+          <ProjectsList projects={activeProjects} actions={projectActions}></ProjectsList>
         )}
+        {actionsError && <p role="alert">{actionsError}</p>}
       </section>
     </main>
   );
