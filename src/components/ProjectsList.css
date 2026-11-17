@@ -2,6 +2,27 @@
   width: 100%;
 }
 
+.project-view-buttons {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.project-view-buttons button {
+  min-height: 2.75rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  font: inherit;
+  padding: 0.5rem 1.25rem;
+}
+
+.project-view-buttons button[aria-pressed='true'] {
+  color: var(--paper);
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
 .project-sort-controls {
   margin-bottom: 1.5rem;
   display: flex;
@@ -74,5 +95,11 @@
 
   .project-sort-keys {
     width: 100%;
+  }
+
+  .project-view-buttons {
+    width: 100%;
+    margin-right: 0;
+    justify-content: flex-start;
   }
 }

@@ -74,8 +74,6 @@ export default function DashboardPage() {
     completeProject,
   };
 
-  const activeProjects = projects.filter((project) => project.status !== 'complete');
-
   return (
     <main className="dashboard-page">
       <section className="projects-heading" aria-labelledby="projects-heading">
@@ -121,7 +119,7 @@ export default function DashboardPage() {
         )}
         {!loadingProjects && !projectsError && projects.length === 0 && <p>No projects yet.</p>}
         {!loadingProjects && !projectsError && projects.length > 0 && (
-          <ProjectsList projects={activeProjects} actions={projectActions}></ProjectsList>
+          <ProjectsList projects={projects} actions={projectActions}></ProjectsList>
         )}
         {actionsError && <p role="alert">{actionsError}</p>}
       </section>
