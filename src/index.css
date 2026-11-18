@@ -1,23 +1,33 @@
 :root {
-  --paper: #f9faff;
-  --ink: #141a1c;
+  --ink: #071015;
+  --paper: #e9f0f2;
   --blue: #3659eb;
+  --blue-bright: #687fef;
   --yellow: #fbd074;
-  --muted: #667074;
-  --rule: rgb(20 26 28 / 24%);
+  --yellow-bright: #ffe09b;
+  --muted: #9eafb5;
+  --rule: rgb(233 240 242 / 16%);
+  --rule-strong: rgb(233 240 242 / 28%);
+  --surface: rgb(8 16 21 / 76%);
+  --surface-strong: rgb(8 16 21 / 90%);
+  --surface-input: rgb(4 10 14 / 60%);
+  --blue-soft: rgb(54 89 235 / 16%);
+  --yellow-soft: rgb(251 208 116 / 10%);
+  --shadow: 0 1.5rem 5rem rgb(0 0 0 / 32%), inset 0 1px 0 rgb(255 255 255 / 6%);
 
   --content-width: 90rem;
   --page-gutter: clamp(1rem, 4vw, 4rem);
   --grid-gap: clamp(1rem, 2vw, 2rem);
-  --font-sans: Arial, 'Helvetica Neue', sans-serif;
+  --radius: 0.35rem;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
   --text-display: clamp(4.25rem, 11vw, 10rem);
   --text-page-heading: clamp(2rem, 5vw, 4rem);
   --text-section-heading: clamp(1.5rem, 3vw, 2.5rem);
 
-  color-scheme: light;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: var(--font-sans);
+  color-scheme: dark;
+  color: var(--paper);
+  background: var(--ink);
+  font-family: var(--font-mono);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -32,19 +42,28 @@
 
 html {
   min-width: 20rem;
-  background: var(--paper);
+  background: var(--ink);
 }
 
 body {
   min-width: 20rem;
   min-height: 100svh;
   margin: 0;
+  background: radial-gradient(circle at 8% 0%, rgb(54 89 235 / 24%), transparent 32rem), var(--ink);
+  background-attachment: fixed;
 }
 
 button,
 input,
+select,
 textarea {
   font: inherit;
+}
+
+button,
+a,
+select {
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -66,6 +85,11 @@ p {
 ::selection {
   color: var(--ink);
   background: var(--yellow);
+}
+
+:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
 }
 
 #root {
