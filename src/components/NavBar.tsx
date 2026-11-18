@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router';
 
 import logo from '../assets/brand/logo.svg';
+import logoWordmark from '../assets/brand/logo-wordmark.svg';
 import { logout } from '../api/auth';
 import { ApiError } from '../api/client';
 import type { UserSummary } from '../api/users';
@@ -64,7 +65,10 @@ export default function NavBar({ user, onLogout }: LogoutProps) {
     <div className="navbar">
       <nav aria-label="Primary navigation">
         <Link to="/" className="navbar-brand">
-          <img src={logo} alt="Dutyy" />
+          <picture>
+            <source media="(max-width: 48rem)" srcSet={logo} />
+            <img src={logoWordmark} alt="Dutyy home" />
+          </picture>
         </Link>
         <div className="navbar-actions">
           {user ? (

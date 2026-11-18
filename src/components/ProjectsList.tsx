@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import type { Project } from '../api/projects';
 import ProjectRow from './ProjectRow';
+import './ProjectsList.css';
 
 type SortKey = 'status' | 'activity' | 'name';
 
