@@ -38,6 +38,11 @@ export default function ProjectRow({
     }
   }
 
+  const lastActivityDate = new Date(lastActivity).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
   return (
     <>
       <tr className="project-row">
@@ -61,7 +66,7 @@ export default function ProjectRow({
           {completed} of {project.dutyys.length}
         </td>
         <td>{project.publishing_status}</td>
-        <td>{lastActivity}</td>
+        <td>{lastActivityDate}</td>
         <td className="project-row__action-cell">
           <div
             className="project-row__actions"
