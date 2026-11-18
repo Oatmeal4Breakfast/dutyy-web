@@ -1,18 +1,48 @@
 import { useState } from 'react';
-import type { Project } from '../api/projects';
 import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
+import type { CreateDutyyRequest, Project } from '../api/projects';
 import './ProjectRow.css';
 
 type ProjectRowProps = {
   project: Project;
   completed: number;
   lastActivity: string;
+  actions: ProjectActions;
+  onRequestAddDutyy: () => void;
 };
 
-export default function ProjectRow({ project, completed, lastActivity }: ProjectRowProps) {
+export type ProjectActions = {
+  completeProject: (projectId: string) => Promise<void>;
+  addDutyyToProject: (projectId: string, payload: CreateDutyyRequest) => Promise<void>;
+};
+
+export default function ProjectRow({
+  project,
+  completed,
+  lastActivity,
+  actions,
+  onRequestAddDutyy,
+}: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
+  const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
+  const [isCompleting, setIsCompleting] = useState<boolean>(false);
   const dutyysId = `project-${project.id}-dutyys`;
 
+  async function handleCompleteProject(): Promise<void> {
+    setIsCompleting(true);
+
+    try {
+      await actions.completeProject(project.id);
+    } finally {
+      setIsCompleting(false);
+    }
+  }
+
+  const lastActivityDate = new Date(lastActivity).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
   return (
     <>
       <tr className="project-row">
@@ -36,17 +66,19 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
           {completed} of {project.dutyys.length}
         </td>
         <td>{project.publishing_status}</td>
-        <td>{lastActivity}</td>
-        <td>
+        <td>{lastActivityDate}</td>
+        <td className="project-row__action-cell">
           <div
-            className="project-row__action-cell"
+            className="project-row__actions"
             role="group"
             aria-label={`Actions for ${project.name}`}
           >
             <button
               type="button"
-              className="project-action-button"
+              className={`project-action-button ${isCompleting ? 'project-action-button--pending' : ''}`}
               aria-label={`Complete ${project.name}`}
+              onClick={() => void handleCompleteProject()}
+              disabled={isCompleting || project.status === 'complete'}
             >
               <Check aria-hidden="true" />
             </button>
@@ -54,6 +86,8 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
               type="button"
               className="project-action-button"
               aria-label={`Add dutyy to ${project.name}`}
+              aria-haspopup="dialog"
+              onClick={onRequestAddDutyy}
             >
               <Plus aria-hidden="true" />
             </button>
@@ -62,14 +96,17 @@ export default function ProjectRow({ project, completed, lastActivity }: Project
               className="project-action-button"
               aria-label={`Edit ${project.name}`}
             >
-              <SquarePen aria-label="edit-project" />
+              <SquarePen aria-hidden="true" />
             </button>
             <button
               type="button"
               className="project-action-button"
               aria-label={`More actions for ${project.name}`}
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
             >
-              <Ellipsis aria-label="action-menu" />
+              <Ellipsis aria-hidden="true" />
             </button>
           </div>
         </td>
