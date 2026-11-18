@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
-import type { Project } from '../api/projects';
+import type { CreateDutyyRequest, Project } from '../api/projects';
 import './ProjectRow.css';
 
 type ProjectRowProps = {
@@ -8,13 +8,21 @@ type ProjectRowProps = {
   completed: number;
   lastActivity: string;
   actions: ProjectActions;
+  onRequestAddDutyy: () => void;
 };
 
 export type ProjectActions = {
   completeProject: (projectId: string) => Promise<void>;
+  addDutyyToProject: (projectId: string, payload: CreateDutyyRequest) => Promise<void>;
 };
 
-export default function ProjectRow({ project, completed, lastActivity, actions }: ProjectRowProps) {
+export default function ProjectRow({
+  project,
+  completed,
+  lastActivity,
+  actions,
+  onRequestAddDutyy,
+}: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
   const [isCompleting, setIsCompleting] = useState<boolean>(false);
@@ -73,6 +81,8 @@ export default function ProjectRow({ project, completed, lastActivity, actions }
               type="button"
               className="project-action-button"
               aria-label={`Add dutyy to ${project.name}`}
+              aria-haspopup="dialog"
+              onClick={onRequestAddDutyy}
             >
               <Plus aria-hidden="true" />
             </button>

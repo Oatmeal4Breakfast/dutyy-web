@@ -2,6 +2,7 @@ import { useState, type ChangeEvent } from 'react';
 import type { Project } from '../api/projects';
 import type { ProjectActions } from './ProjectRow';
 import ProjectRow from './ProjectRow';
+import { AddDutyyToProjectModal } from './AddDutyyToProjectModal';
 import './ProjectsList.css';
 
 type SortKey = 'status' | 'activity' | 'name';
@@ -15,6 +16,7 @@ type ProjectsListProps = {
 export default function ProjectsList({ projects, actions }: ProjectsListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('status');
   const [projectView, setProjectView] = useState<ProjectView>('active');
+  const [addDutyyProject, setAddDutyyProject] = useState<Project | null>(null);
 
   function getLastActivity(project: Project): string {
     return project.modified_date ?? project.created_date;
@@ -101,12 +103,21 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
                   completed={completedDutyys}
                   lastActivity={lastActivity}
                   actions={actions}
+                  onRequestAddDutyy={() => setAddDutyyProject(project)}
                 />
               );
             })}
           </tbody>
         </table>
       </div>
+      {addDutyyProject && (
+        <AddDutyyToProjectModal
+          projectId={addDutyyProject.id}
+          projectName={addDutyyProject.name}
+          addDutyy={actions.addDutyyToProject}
+          onClose={() => setAddDutyyProject(null)}
+        />
+      )}
     </div>
   );
 }

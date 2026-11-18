@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { Project } from '../api/projects';
-import { getProjectById, getProjects, patchProject } from '../api/projects';
+import type { CreateDutyyRequest, Project } from '../api/projects';
+import { addDutyy, getProjectById, getProjects, patchProject } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { ApiError } from '../api/client';
 import ProjectsList from '../components/ProjectsList';
@@ -70,8 +70,15 @@ export default function DashboardPage() {
     }
   }
 
+  async function addDutyyToProject(projectId: string, payload: CreateDutyyRequest): Promise<void> {
+    setActionsError(null);
+    await addDutyy(projectId, payload);
+    await refreshProject(projectId);
+  }
+
   const projectActions: ProjectActions = {
     completeProject,
+    addDutyyToProject,
   };
 
   return (
