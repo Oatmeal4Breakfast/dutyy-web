@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Project } from '../api/projects';
 import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
+import './ProjectRow.css';
 
 type ProjectRowProps = {
   project: Project;
