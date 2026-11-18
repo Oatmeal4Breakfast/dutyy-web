@@ -1,16 +1,22 @@
 import { useState, type ChangeEvent } from 'react';
 import type { Project } from '../api/projects';
+import type { ProjectActions } from './ProjectRow';
 import ProjectRow from './ProjectRow';
+import { AddDutyyToProjectModal } from './AddDutyyToProjectModal';
 import './ProjectsList.css';
 
 type SortKey = 'status' | 'activity' | 'name';
+type ProjectView = 'active' | 'completed' | 'all';
 
 type ProjectsListProps = {
   projects: Project[];
+  actions: ProjectActions;
 };
 
-export default function ProjectsList({ projects }: ProjectsListProps) {
+export default function ProjectsList({ projects, actions }: ProjectsListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('status');
+  const [projectView, setProjectView] = useState<ProjectView>('active');
+  const [addDutyyProject, setAddDutyyProject] = useState<Project | null>(null);
 
   function getLastActivity(project: Project): string {
     return project.modified_date ?? project.created_date;
@@ -20,7 +26,20 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
     setSortKey(event.target.value as SortKey);
   }
 
-  const sortedProjects = projects.toSorted((a, b) => {
+  const filteredProjects = projects.filter((project) => {
+    switch (projectView) {
+      case 'active':
+        return project.status === 'new' || project.status === 'in_progress';
+
+      case 'completed':
+        return project.status === 'complete';
+
+      case 'all':
+        return true;
+    }
+  });
+
+  const sortedProjects = filteredProjects.toSorted((a, b) => {
     if (sortKey === 'activity') {
       const aDate = getLastActivity(a);
       const bDate = getLastActivity(b);
@@ -32,6 +51,19 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
   return (
     <div className="projects-list">
       <div className="project-sort-controls">
+        <div className="project-view-buttons" role="group" aria-label="project-filter">
+          {(['active', 'completed', 'all'] as const).map((view) => (
+            <button
+              key={view}
+              type="button"
+              aria-pressed={projectView === view}
+              onClick={() => setProjectView(view)}
+            >
+              {view}
+            </button>
+          ))}
+        </div>
+
         <label htmlFor="project-sort">Sort projects by</label>
         <select
           id="project-sort"
@@ -70,12 +102,22 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
                   project={project}
                   completed={completedDutyys}
                   lastActivity={lastActivity}
+                  actions={actions}
+                  onRequestAddDutyy={() => setAddDutyyProject(project)}
                 />
               );
             })}
           </tbody>
         </table>
       </div>
+      {addDutyyProject && (
+        <AddDutyyToProjectModal
+          projectId={addDutyyProject.id}
+          projectName={addDutyyProject.name}
+          addDutyy={actions.addDutyyToProject}
+          onClose={() => setAddDutyyProject(null)}
+        />
+      )}
     </div>
   );
 }
