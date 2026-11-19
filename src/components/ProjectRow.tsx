@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { ChevronDown, Plus, SquarePen, Check, Ellipsis } from 'lucide-react';
+import { ChevronDown, Plus, SquarePen, Check, Trash } from 'lucide-react';
 import type { CreateDutyyRequest, Project, UpdateProjectRequest } from '../api/projects';
 import './ProjectRow.css';
-
 type ProjectRowProps = {
   project: Project;
   completed: number;
@@ -16,6 +15,7 @@ export type ProjectActions = {
   completeProject: (projectId: string) => Promise<void>;
   addDutyyToProject: (projectId: string, payload: CreateDutyyRequest) => Promise<void>;
   editProject: (projectId: string, payload: UpdateProjectRequest) => Promise<void>;
+  removeProject: (projectId: string) => Promise<void>;
 };
 
 export default function ProjectRow({
@@ -29,6 +29,7 @@ export default function ProjectRow({
   const [isExpanded, setExpanded] = useState<boolean>(false);
   const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
   const [isCompleting, setIsCompleting] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const dutyysId = `project-${project.id}-dutyys`;
 
   async function handleCompleteProject(): Promise<void> {
@@ -38,6 +39,24 @@ export default function ProjectRow({
       await actions.completeProject(project.id);
     } finally {
       setIsCompleting(false);
+    }
+  }
+
+  async function handleRemoveProject(): Promise<void> {
+    const confirmed = window.confirm(
+      `Delete "${project.name}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await actions.removeProject(project.id);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -106,12 +125,10 @@ export default function ProjectRow({
             <button
               type="button"
               className="project-action-button"
-              aria-label={`More actions for ${project.name}`}
-              aria-haspopup="menu"
-              aria-expanded={isMenuOpen}
-              onClick={() => setMenuOpen((current) => !current)}
+              aria-label={`Remove ${project.name}`}
+              onClick={() => void handleRemoveProject()}
             >
-              <Ellipsis aria-hidden="true" />
+              <Trash aria-hidden="true" />
             </button>
           </div>
         </td>

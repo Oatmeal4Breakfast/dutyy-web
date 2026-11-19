@@ -125,3 +125,9 @@ export function deleteDutyy(projectId: string, dutyyId: string): Promise<void> {
     },
   );
 }
+
+export function deleteProject(projectId: string): Promise<void> {
+  return apiRequest(`/projects/${encodeURIComponent(projectId)}`, {
+    method: 'DELETE',
+  });
+}
