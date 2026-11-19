@@ -91,7 +91,7 @@ export default function DashboardPage() {
   async function removeProject(projectId: string): Promise<void> {
     setActionsError(null);
     await deleteProject(projectId);
-    setProjects(() => projects.filter((project) => project.id !== projectId));
+    setProjects((current) => current.filter((project) => project.id !== projectId));
   }
 
   const projectActions: ProjectActions = {

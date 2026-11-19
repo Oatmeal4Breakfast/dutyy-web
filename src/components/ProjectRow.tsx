@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, Plus, SquarePen, Check, Trash } from 'lucide-react';
 import type { CreateDutyyRequest, Project, UpdateProjectRequest } from '../api/projects';
+import { ApiError } from '../api/client';
 import './ProjectRow.css';
 type ProjectRowProps = {
   project: Project;
@@ -27,9 +28,9 @@ export default function ProjectRow({
   onRequestEditProject,
 }: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
-  const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
   const [isCompleting, setIsCompleting] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const dutyysId = `project-${project.id}-dutyys`;
 
   async function handleCompleteProject(): Promise<void> {
@@ -43,18 +44,23 @@ export default function ProjectRow({
   }
 
   async function handleRemoveProject(): Promise<void> {
-    const confirmed = window.confirm(
-      `Delete "${project.name}"? This action cannot be undone.`,
-    );
+    const confirmed = window.confirm(`Delete "${project.name}"? This action cannot be undone.`);
 
     if (!confirmed) {
       return;
     }
 
+    setDeleteError(null);
     setIsDeleting(true);
 
     try {
       await actions.removeProject(project.id);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setDeleteError(String(error.getDetail() ?? error.message));
+      } else {
+        setDeleteError('Unable to delete project');
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -124,15 +130,26 @@ export default function ProjectRow({
             </button>
             <button
               type="button"
-              className="project-action-button"
-              aria-label={`Remove ${project.name}`}
+              className={`project-action-button project-action-button--destructive ${
+                isDeleting ? 'project-action-button--pending' : ''
+              }`}
+              aria-label={isDeleting ? `Deleting ${project.name}` : `Delete ${project.name}`}
+              aria-busy={isDeleting}
               onClick={() => void handleRemoveProject()}
+              disabled={isDeleting}
             >
               <Trash aria-hidden="true" />
             </button>
           </div>
         </td>
       </tr>
+      {deleteError && (
+        <tr className="project-row__error-row">
+          <td colSpan={5} className="project-row__error-cell">
+            <p role="alert">{deleteError}</p>
+          </td>
+        </tr>
+      )}
       {isExpanded && (
         <tr id={dutyysId} className="project-dutyys-row">
           <td colSpan={5} className="project-dutyys-cell">
