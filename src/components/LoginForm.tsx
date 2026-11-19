@@ -26,7 +26,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
       onLogin(response.user_summary);
     } catch (error) {
       if (error instanceof ApiError) {
-        setError(error.message);
+        setError(String(error.getDetail() ?? error.message));
       } else {
         setError('Unable to sign in');
       }
