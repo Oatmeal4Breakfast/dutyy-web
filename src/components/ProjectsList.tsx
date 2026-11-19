@@ -3,6 +3,7 @@ import type { Project } from '../api/projects';
 import type { ProjectActions } from './ProjectRow';
 import ProjectRow from './ProjectRow';
 import { AddDutyyToProjectModal } from './AddDutyyToProjectModal';
+import { EditProjectModal } from './EditProjectModal';
 import './ProjectsList.css';
 
 type SortKey = 'status' | 'activity' | 'name';
@@ -17,6 +18,7 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('status');
   const [projectView, setProjectView] = useState<ProjectView>('active');
   const [addDutyyProject, setAddDutyyProject] = useState<Project | null>(null);
+  const [projectBeingEdited, setProjectBeingEdited] = useState<Project | null>(null);
 
   function getLastActivity(project: Project): string {
     return project.modified_date ?? project.created_date;
@@ -104,6 +106,7 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
                   lastActivity={lastActivity}
                   actions={actions}
                   onRequestAddDutyy={() => setAddDutyyProject(project)}
+                  onRequestEditProject={() => setProjectBeingEdited(project)}
                 />
               );
             })}
@@ -116,6 +119,15 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
           projectName={addDutyyProject.name}
           addDutyy={actions.addDutyyToProject}
           onClose={() => setAddDutyyProject(null)}
+        />
+      )}
+      {projectBeingEdited && (
+        <EditProjectModal
+          projectId={projectBeingEdited.id}
+          currentProjectName={projectBeingEdited.name}
+          currentProjectStatus={projectBeingEdited.status}
+          editProject={actions.editProject}
+          onClose={() => setProjectBeingEdited(null)}
         />
       )}
     </div>

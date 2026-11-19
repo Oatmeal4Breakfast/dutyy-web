@@ -1,0 +1,208 @@
+.edit-project-dialog {
+  --terminal-surface: rgb(8 16 21 / 88%);
+  --terminal-line: rgb(249 250 255 / 16%);
+  --terminal-text: #e9f0f2;
+  --terminal-muted: #9eafb5;
+
+  width: min(calc(100% - 2rem), 38rem);
+  max-height: calc(100svh - 2rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgb(251 208 116 / 65%);
+  border-radius: 0.35rem;
+  color: var(--terminal-text);
+  background:
+    radial-gradient(circle at 15% 0%, rgb(54 89 235 / 24%), transparent 82%),
+    var(--terminal-surface);
+  box-shadow:
+    0 1.5rem 5rem rgb(0 0 0 / 48%),
+    0 0 0 1px rgb(54 89 235 / 24%),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+  backdrop-filter: blur(1.25rem) saturate(140%);
+  -webkit-backdrop-filter: blur(1.25rem) saturate(140%);
+  color-scheme: dark;
+}
+
+.edit-project-dialog::backdrop {
+  background: rgb(5 9 12 / 72%);
+  backdrop-filter: blur(0.35rem);
+  -webkit-backdrop-filter: blur(0.35rem);
+}
+
+.edit-project-form {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  display: grid;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+.edit-project-form header {
+  margin-bottom: 1rem;
+}
+
+.edit-project-form__kicker {
+  margin-bottom: 0.75rem;
+  color: var(--yellow);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 0 1rem rgb(251 208 116 / 50%);
+}
+
+.edit-project-form__kicker::before {
+  content: '> ';
+}
+
+.edit-project-form h2 {
+  font-size: var(--text-section-heading);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-shadow: 0 0 1.5rem rgb(54 89 235 / 38%);
+}
+
+.edit-project-form__description {
+  max-width: 42ch;
+  margin-top: 1rem;
+  color: var(--terminal-muted);
+  line-height: 1.5;
+}
+
+.edit-project-form label {
+  margin-top: 0.75rem;
+  color: var(--terminal-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.edit-project-form input,
+.edit-project-form select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--terminal-line);
+  border-radius: 0.2rem;
+  color: var(--terminal-text);
+  background: rgb(4 10 14 / 58%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  caret-color: var(--yellow);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.edit-project-form input:hover:not(:disabled),
+.edit-project-form select:hover:not(:disabled) {
+  border-color: rgb(249 250 255 / 32%);
+}
+
+.edit-project-form input:focus,
+.edit-project-form select:focus {
+  border-color: rgb(251 208 116 / 80%);
+  background: rgb(4 10 14 / 76%);
+  box-shadow:
+    0 0 0 1px rgb(251 208 116 / 18%),
+    0 0 1.5rem rgb(54 89 235 / 12%);
+}
+
+.edit-project-form input:focus-visible,
+.edit-project-form select:focus-visible,
+.edit-project-form button:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.edit-project-form [role='alert'] {
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgb(251 208 116 / 35%);
+  border-left: 0.4rem solid var(--yellow);
+  color: var(--terminal-text);
+  background: rgb(251 208 116 / 8%);
+}
+
+.edit-project-form__actions {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.edit-project-form__actions button {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--terminal-line);
+  border-radius: 0.2rem;
+  color: var(--terminal-text);
+  background: rgb(4 10 14 / 42%);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.edit-project-form__actions button[type='submit'] {
+  color: var(--ink);
+  border-color: var(--yellow);
+  background: var(--yellow);
+  box-shadow: 0 0 1.5rem rgb(251 208 116 / 16%);
+}
+
+.edit-project-form__actions button:hover:not(:disabled) {
+  color: var(--paper);
+  border-color: rgb(104 127 239);
+  background: rgb(54 89 235 / 78%);
+  box-shadow: 0 0 1.5rem rgb(54 89 235 / 28%);
+}
+
+.edit-project-form__actions button[type='submit']:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--yellow-bright);
+  background: var(--yellow-bright);
+  box-shadow: 0 0 1.75rem rgb(251 208 116 / 30%);
+}
+
+.edit-project-form button:disabled,
+.edit-project-form input:disabled,
+.edit-project-form select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edit-project-form[aria-busy='true'] button:disabled,
+.edit-project-form[aria-busy='true'] input:disabled,
+.edit-project-form[aria-busy='true'] select:disabled {
+  cursor: wait;
+}
+
+@media (max-width: 32rem) {
+  .edit-project-dialog {
+    width: calc(100% - 1rem);
+    max-height: calc(100svh - 1rem);
+    box-shadow:
+      0 1rem 3rem rgb(0 0 0 / 48%),
+      0 0 0 1px rgb(54 89 235 / 24%);
+  }
+
+  .edit-project-form__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-project-form input,
+  .edit-project-form select,
+  .edit-project-form__actions button {
+    transition: none;
+  }
+}
