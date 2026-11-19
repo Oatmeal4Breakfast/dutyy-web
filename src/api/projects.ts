@@ -104,13 +104,19 @@ export function addDutyy(projectId: string, dutyy: CreateDutyyRequest): Promise<
 }
 
 export function patchDutyy(dutyyId: string, patch: PatchDutyyRequest): Promise<Dutyy> {
-  const hasValue: boolean = [patch.title, patch.details, patch.status].some(
-    (p) => p !== null && p !== undefined && p.trim() !== '',
-  );
+  const hasValue =
+    (patch.title !== null && patch.title !== undefined && patch.title.trim() !== '') ||
+    (patch.status !== null && patch.status !== undefined) ||
+    patch.details !== undefined;
 
   if (!hasValue) {
     throw new Error('No fields provided to update');
   }
+
+  if (patch.title !== null && patch.title !== undefined && patch.title.trim() === '') {
+    throw new Error('Dutyy title cannot be empty');
+  }
+
   return apiRequest(`/dutyys/${encodeURIComponent(dutyyId)}`, {
     method: 'PATCH',
     body: JSON.stringify(patch),

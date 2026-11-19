@@ -74,21 +74,6 @@
   border-bottom: 0;
 }
 
-.project-dutyy-summary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  font-weight: 700;
-}
-
-.project-dutyy-status {
-  color: var(--yellow);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .project-dutyys-list p,
 .project-dutyys-empty {
   margin-top: 0.45rem;
