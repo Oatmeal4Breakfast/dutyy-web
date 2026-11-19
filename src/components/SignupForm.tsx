@@ -31,7 +31,7 @@ export default function SignupForm() {
       setSuccess('Account created. Check your email');
     } catch (error) {
       if (error instanceof ApiError) {
-        setError(error.message);
+        setError(String(error.getDetail() ?? error.message));
       } else {
         setError('Unable to submit signup form');
       }

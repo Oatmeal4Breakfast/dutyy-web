@@ -67,7 +67,7 @@ export default function CreateProjectForm({ onCreated }: CreateProjectFormProps)
       setSuccess(`Project "${project.name}" created.`);
     } catch (error) {
       if (error instanceof ApiError) {
-        setError(error.message);
+        setError(String(error.getDetail() ?? error.message));
       } else {
         setError('Unable to create new project');
       }

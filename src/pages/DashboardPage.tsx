@@ -42,7 +42,7 @@ export default function DashboardPage() {
         if (!active) return;
 
         if (error instanceof ApiError) {
-          setProjectsError(error.message);
+          setProjectsError(String(error.getDetail() ?? error.message));
         } else {
           setProjectsError('Unable to load projects');
         }
@@ -76,7 +76,7 @@ export default function DashboardPage() {
       await refreshProject(projectId);
     } catch (error) {
       if (error instanceof ApiError) {
-        setActionsError(error.message);
+        setActionsError(String(error.getDetail() ?? error.message));
       } else {
         setActionsError('Could not mark project as complete');
       }
