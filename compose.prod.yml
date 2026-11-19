@@ -1,0 +1,90 @@
+---
+name: dutyy
+
+services:
+  db:
+    image: postgres:18.4
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - '${POSTGRES_BIND_ADDRESS:?Set POSTGRES_BIND_ADDRESS to the server Tailscale IP}:5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - app
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  migrate:
+    image: ghcr.io/oatmeal4breakfast/dutyy-api:6e9c441d89cc8513582767c6bb6a8473a8b2f70c
+    command: ['alembic', 'upgrade', 'head']
+    restart: 'no'
+    env_file:
+      - .env.production
+    networks:
+      - app
+    depends_on:
+      db:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    image: ghcr.io/oatmeal4breakfast/dutyy-api:6e9c441d89cc8513582767c6bb6a8473a8b2f70c
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env.production
+    networks:
+      - app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=4)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/oatmeal4breakfast/dutyy-web:latest}
+    restart: unless-stopped
+    init: true
+    environment:
+      API_UPSTREAM: api:8000
+      FORWARDED_PROTO: https
+    networks:
+      app:
+      cloudflared:
+        aliases:
+          - dutyy-web
+    depends_on:
+      api:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres_data:
+
+networks:
+  app:
+  cloudflared:
+    external: true
+    name: cloudflared
