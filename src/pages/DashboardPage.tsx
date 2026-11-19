@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { CreateDutyyRequest, Project } from '../api/projects';
+import type { CreateDutyyRequest, Project, UpdateProjectRequest } from '../api/projects';
 import { addDutyy, getProjectById, getProjects, patchProject } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { ApiError } from '../api/client';
@@ -76,9 +76,16 @@ export default function DashboardPage() {
     await refreshProject(projectId);
   }
 
+  async function editProject(projectId: string, payload: UpdateProjectRequest): Promise<void> {
+    setActionsError(null);
+    await patchProject(projectId, payload);
+    await refreshProject(projectId);
+  }
+
   const projectActions: ProjectActions = {
     completeProject,
     addDutyyToProject,
+    editProject,
   };
 
   return (
