@@ -1,0 +1,169 @@
+.dutyy-row {
+  position: relative;
+}
+
+.dutyy-row__content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dutyy-row__text {
+  min-width: 0;
+  flex: 1;
+}
+
+.dutyy-row__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 700;
+}
+
+.dutyy-row__status {
+  flex: 0 0 auto;
+  color: var(--yellow);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dutyy-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dutyy-action-button {
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0.45rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 0.2rem;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.dutyy-action-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dutyy-action-button:hover:not(:disabled) {
+  border-color: rgb(104 127 239 / 48%);
+  color: var(--paper);
+  background: var(--blue-soft);
+  box-shadow: 0 0 1.25rem rgb(54 89 235 / 18%);
+}
+
+.dutyy-action-button:focus-visible,
+.dutyy-row__menu button:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.dutyy-action-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dutyy-action-button--pending:disabled {
+  cursor: wait;
+}
+
+.dutyy-row__menu-container {
+  position: relative;
+}
+
+.dutyy-row__menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  min-width: 9rem;
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.2rem;
+  border: 1px solid rgb(249 250 255 / 18%);
+  border-radius: 0.25rem;
+  background: #0b151b;
+  box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 42%);
+}
+
+.dutyy-row__menu button {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.2rem;
+  color: var(--paper);
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dutyy-row__menu button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.dutyy-row__menu button:hover:not(:disabled),
+.dutyy-row__menu button:focus-visible {
+  border-color: rgb(104 127 239 / 42%);
+  background: var(--blue-soft);
+}
+
+.dutyy-row__menu .dutyy-row__delete-action {
+  color: #ffaaa3;
+}
+
+.dutyy-row__menu .dutyy-row__delete-action:hover:not(:disabled),
+.dutyy-row__menu .dutyy-row__delete-action:focus-visible {
+  border-color: rgb(255 138 128 / 40%);
+  color: #ffd0cc;
+  background: rgb(255 138 128 / 10%);
+}
+
+.dutyy-row__menu button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.project-dutyys-list .dutyy-row__error {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-left: 0.25rem solid #ff8a80;
+  color: var(--paper);
+  background: rgb(255 138 128 / 8%);
+}
+
+@media (max-width: 40rem) {
+  .dutyy-row__content {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dutyy-row__actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dutyy-action-button {
+    transition: none;
+  }
+}

@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import type { CreateDutyyRequest, Project, UpdateProjectRequest } from '../api/projects';
+import type {
+  CreateDutyyRequest,
+  PatchDutyyRequest,
+  Project,
+  UpdateProjectRequest,
+} from '../api/projects';
 import {
   addDutyy,
+  deleteDutyy,
   deleteProject,
   getProjectById,
   getProjects,
+  patchDutyy,
   patchProject,
 } from '../api/projects';
 import CreateProjectForm from '../components/CreateProjectForm';
@@ -88,6 +95,25 @@ export default function DashboardPage() {
     await refreshProject(projectId);
   }
 
+  async function editDutyy(
+    projectId: string,
+    dutyyId: string,
+    payload: PatchDutyyRequest,
+  ): Promise<void> {
+    await patchDutyy(dutyyId, payload);
+    await refreshProject(projectId);
+  }
+
+  async function completeDutyy(projectId: string, dutyyId: string): Promise<void> {
+    await patchDutyy(dutyyId, { status: 'complete' });
+    await refreshProject(projectId);
+  }
+
+  async function removeDutyy(projectId: string, dutyyId: string): Promise<void> {
+    await deleteDutyy(projectId, dutyyId);
+    await refreshProject(projectId);
+  }
+
   async function removeProject(projectId: string): Promise<void> {
     setActionsError(null);
     await deleteProject(projectId);
@@ -98,6 +124,9 @@ export default function DashboardPage() {
     completeProject,
     addDutyyToProject,
     editProject,
+    editDutyy,
+    completeDutyy,
+    removeDutyy,
     removeProject,
   };
 

@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { ChevronDown, Plus, SquarePen, Check, Trash } from 'lucide-react';
-import type { CreateDutyyRequest, Project, UpdateProjectRequest } from '../api/projects';
+import type {
+  CreateDutyyRequest,
+  PatchDutyyRequest,
+  Project,
+  UpdateProjectRequest,
+} from '../api/projects';
 import { ApiError } from '../api/client';
+import DutyyRow from './DutyyRow';
 import './ProjectRow.css';
 type ProjectRowProps = {
   project: Project;
@@ -16,6 +22,9 @@ export type ProjectActions = {
   completeProject: (projectId: string) => Promise<void>;
   addDutyyToProject: (projectId: string, payload: CreateDutyyRequest) => Promise<void>;
   editProject: (projectId: string, payload: UpdateProjectRequest) => Promise<void>;
+  editDutyy: (projectId: string, dutyyId: string, payload: PatchDutyyRequest) => Promise<void>;
+  completeDutyy: (projectId: string, dutyyId: string) => Promise<void>;
+  removeDutyy: (projectId: string, dutyyId: string) => Promise<void>;
   removeProject: (projectId: string) => Promise<void>;
 };
 
@@ -156,13 +165,7 @@ export default function ProjectRow({
             {project.dutyys.length > 0 ? (
               <ul className="project-dutyys-list">
                 {project.dutyys.map((dutyy) => (
-                  <li key={dutyy.id}>
-                    <div className="project-dutyy-summary">
-                      <span>{dutyy.title}</span>
-                      <span className="project-dutyy-status">{dutyy.status.replace('_', ' ')}</span>
-                    </div>
-                    {dutyy.details && <p>{dutyy.details}</p>}
-                  </li>
+                  <DutyyRow key={dutyy.id} projectId={project.id} dutyy={dutyy} actions={actions} />
                 ))}
               </ul>
             ) : (
