@@ -69,7 +69,6 @@ export default function ProjectRow({
         <td>
           {completed} of {project.dutyys.length}
         </td>
-        <td>{project.publishing_status}</td>
         <td>{lastActivityDate}</td>
         <td className="project-row__action-cell">
           <div
@@ -119,7 +118,7 @@ export default function ProjectRow({
       </tr>
       {isExpanded && (
         <tr id={dutyysId} className="project-dutyys-row">
-          <td colSpan={6} className="project-dutyys-cell">
+          <td colSpan={5} className="project-dutyys-cell">
             {project.dutyys.length > 0 ? (
               <ul className="project-dutyys-list">
                 {project.dutyys.map((dutyy) => (
