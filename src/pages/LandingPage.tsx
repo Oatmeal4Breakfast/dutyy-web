@@ -77,7 +77,7 @@ export default function LandingPage() {
         <header className="landing-workflow__header">
           <p className="landing-section-kicker">Work in motion</p>
           <h2 id="workflow-title">
-            <span>Edit the details. Finish the work.</span>
+            <span>Edit the details.</span>
             <span>Finish the work.</span>
           </h2>
           <p>
