@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import './App.css';
 import { restoreSession } from './api/auth';
+import { registerSessionExpiredHandler } from './api/client';
 import type { UserSummary } from './api/users';
 import NavBar from './components/NavBar';
 import DashboardPage from './pages/DashboardPage';
@@ -14,6 +15,14 @@ import SetPasswordPage from './pages/SetPasswordPage';
 function App() {
   const [user, setUser] = useState<UserSummary | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    return registerSessionExpiredHandler(() => {
+      setSessionExpired(true);
+      setUser(null);
+    });
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -44,6 +53,11 @@ function App() {
     );
   }
 
+  function handleLogin(user: UserSummary) {
+    setSessionExpired(false);
+    setUser(user);
+  }
+
   return (
     <>
       <NavBar user={user} onLogout={() => setUser(null)} />
@@ -51,7 +65,13 @@ function App() {
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
         <Route
           path="/login"
-          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={setUser} />}
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage onLogin={handleLogin} sessionExpired={sessionExpired} />
+            )
+          }
         />
         <Route
           path="/signup"

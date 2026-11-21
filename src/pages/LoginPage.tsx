@@ -4,9 +4,10 @@ import LoginForm from '../components/LoginForm';
 
 type LoginPageProps = {
   onLogin: (user: UserSummary) => void;
+  sessionExpired: boolean;
 };
 
-export default function LoginPage({ onLogin }: LoginPageProps) {
+export default function LoginPage({ onLogin, sessionExpired }: LoginPageProps) {
   return (
     <main className="login-page">
       <header className="page-header">
@@ -15,6 +16,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       </header>
 
       <section className="auth-panel" aria-label="Log in">
+        {sessionExpired && <p role="alert">Your session expired. Please log in again.</p>}
         <LoginForm onLogin={onLogin} />
         <p className="auth-switch">
           Don&apos;t have an account? <Link to="/signup">Sign up</Link>

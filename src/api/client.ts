@@ -1,5 +1,34 @@
 const API_ROOT = '/dutyy/api/v1';
 let csrfToken: string | null = null;
+let sessionEstablished: boolean = false;
+
+type SessionExpiredHandler = () => void;
+
+let sessionExpiredHandler: SessionExpiredHandler | null = null;
+
+export function registerSessionExpiredHandler(handler: SessionExpiredHandler): () => void {
+  sessionExpiredHandler = handler;
+
+  return () => {
+    if (sessionExpiredHandler === handler) {
+      sessionExpiredHandler = null;
+    }
+  };
+}
+
+export function markSessionEstablished() {
+  sessionEstablished = true;
+}
+
+export function clearEstablishedSession() {
+  sessionEstablished = false;
+  clearCsrfToken();
+}
+
+function invalidateSession() {
+  clearEstablishedSession();
+  sessionExpiredHandler?.();
+}
 
 export class ApiError extends Error {
   status: number;
@@ -42,8 +71,12 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     credentials: 'include',
   });
 
+  if (response.status === 401 && sessionEstablished) {
+    invalidateSession();
+  }
+
   const nextCsrfToken = response.headers.get('X-CSRF-Token');
-  if (nextCsrfToken) csrfToken = nextCsrfToken;
+  if (response.ok && nextCsrfToken) csrfToken = nextCsrfToken;
 
   if (response.status === 204) {
     if (!response.ok) throw new ApiError(response.status, null);
