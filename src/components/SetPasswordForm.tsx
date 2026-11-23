@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, Navigate } from 'react-router';
 import { useState, type SubmitEvent } from 'react';
 import { setUserPassword } from '../api/auth';
 import { ApiError } from '../api/client';
@@ -110,9 +110,11 @@ export default function SetPasswordForm({ token }: { token: string }) {
         </button>
         {error && <p role="alert">{error}</p>}
         {success && (
-          <p role="status">
-            Password Set <Link to="/login">Sign in</Link>
-          </p>
+          <Navigate
+            to="/login"
+            replace
+            state={{ message: 'Password set successfully. You can login now.' }}
+          />
         )}
         {linkExpired && <Link to="/forgot-password">Request new link</Link>}
       </form>
