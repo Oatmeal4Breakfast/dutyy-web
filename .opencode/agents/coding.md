@@ -3,10 +3,10 @@ description: Implements approved work surgically and validates it without weaken
 mode: primary
 permissions:
   - action: edit
-    resource: "*"
+    resource: '*'
     effect: allow
   - action: shell
-    resource: "*"
+    resource: '*'
     effect: allow
 ---
 

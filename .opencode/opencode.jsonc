@@ -5,15 +5,15 @@
     {
       "action": "edit",
       "resource": "*",
-      "effect": "deny"
-    }
+      "effect": "deny",
+    },
   ],
   "agents": {
     "build": {
-      "disabled": true
+      "disabled": true,
     },
     "general": {
-      "disabled": true
-    }
-  }
+      "disabled": true,
+    },
+  },
 }

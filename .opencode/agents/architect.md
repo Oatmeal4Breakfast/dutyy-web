@@ -3,10 +3,10 @@ description: Protects project architecture and evaluates changes across applicat
 mode: primary
 permissions:
   - action: edit
-    resource: "*"
+    resource: '*'
     effect: deny
   - action: shell
-    resource: "*"
+    resource: '*'
     effect: ask
 ---
 
