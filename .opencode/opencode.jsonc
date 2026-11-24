@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "coding",
+  "permissions": [
+    {
+      "action": "edit",
+      "resource": "*",
+      "effect": "deny"
+    }
+  ],
+  "agents": {
+    "build": {
+      "disabled": true
+    },
+    "general": {
+      "disabled": true
+    }
+  }
+}
