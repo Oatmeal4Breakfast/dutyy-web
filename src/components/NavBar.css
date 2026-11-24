@@ -82,7 +82,8 @@
   gap: 0.75rem;
 }
 
-.navbar-dashboard-link {
+.navbar-dashboard-link,
+.navbar-settings-link {
   border-color: transparent;
   background: transparent;
 }

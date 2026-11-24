@@ -82,6 +82,14 @@ export default function NavBar({ user, onLogout }: LogoutProps) {
               >
                 Dashboard
               </NavLink>
+              <NavLink
+                to="/settings/api-keys"
+                className={({ isActive }) =>
+                  `navbar-link navbar-settings-link${isActive ? ' navbar-link--active' : ''}`
+                }
+              >
+                Settings
+              </NavLink>
               <LogoutButton disabled={submitting} onClick={handleLogout} />
             </>
           ) : (

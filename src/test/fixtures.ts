@@ -1,6 +1,7 @@
 import type { Dutyy, Project } from '../api/projects';
 import type { SessionState } from '../api/auth';
 import type { UserSummary } from '../api/users';
+import type { APIKeyResponse } from '../api/api';
 
 export function makeDutyy(overrides: Partial<Dutyy> = {}): Dutyy {
   return {
@@ -50,6 +51,18 @@ export function makeUser(overrides: Partial<UserSummary> = {}): UserSummary {
     last_login: null,
     modified_date: null,
     created_date: '2026-11-19T09:00:00Z',
+    ...overrides,
+  };
+}
+
+export function makeApiKey(overrides: Partial<APIKeyResponse> = {}): APIKeyResponse {
+  return {
+    id: 'api-key-1',
+    name: 'Laptop CLI',
+    status: 'active',
+    created_date: '2026-11-19T09:00:00Z',
+    last_used: null,
+    expires_at: '2099-11-19T09:00:00Z',
     ...overrides,
   };
 }

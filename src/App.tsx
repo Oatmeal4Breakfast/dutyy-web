@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SetPasswordPage from './pages/SetPasswordPage';
+import ApiKeysPage from './pages/ApiKeysPage';
 
 function App() {
   const [user, setUser] = useState<UserSummary | null>(null);
@@ -80,6 +81,16 @@ function App() {
         <Route
           path="/dashboard"
           element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/settings"
+          element={
+            user ? <Navigate to="/settings/api-keys" replace /> : <Navigate to="/login" replace />
+          }
+        />
+        <Route
+          path="/settings/api-keys"
+          element={user ? <ApiKeysPage /> : <Navigate to="/login" replace />}
         />
         <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
