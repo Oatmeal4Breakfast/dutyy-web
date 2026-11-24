@@ -37,6 +37,34 @@ describe('App user and session state management', () => {
     expect(screen.queryByText(SESSION_EXPIRED_MESSAGE)).not.toBeInTheDocument();
   });
 
+  it('redirects an unauthenticated user from API key settings to login', async () => {
+    server.use(
+      http.get(`${API}/auth/session`, () =>
+        HttpResponse.json({ detail: 'invalid session' }, { status: 401 }),
+      ),
+    );
+
+    renderApp('/settings/api-keys');
+
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeVisible();
+  });
+
+  it('redirects authenticated settings requests to API key settings', async () => {
+    server.use(
+      http.get(`${API}/auth/session`, () =>
+        HttpResponse.json(makeSession(), {
+          headers: { 'X-CSRF-Token': 'test-csrf-token' },
+        }),
+      ),
+      http.get(`${API}/api-keys`, () => HttpResponse.json([])),
+    );
+
+    renderApp('/settings');
+
+    expect(await screen.findByRole('heading', { name: 'API keys' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Settings' })).toHaveClass('navbar-link--active');
+  });
+
   it('redirects an established session to login with an expiration message after a 401', async () => {
     server.use(
       http.get(`${API}/auth/session`, () =>
