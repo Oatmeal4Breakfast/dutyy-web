@@ -13,7 +13,26 @@ dev:
 down:
     docker compose -f compose.dev.yml down
 
-# Create pull request
-pr:
-  gh pr create --fill
+# Run selected Vitest tests or filters.
+test-targeted *args:
+    npm test -- {{args}}
 
+# Check formatting without modifying files.
+format-check:
+    npm run format:check
+
+# Run the linter.
+lint:
+    npm run lint
+
+# Run the complete test suite.
+test:
+    npm test
+
+# Type-check and build the production application.
+build:
+    npm run build
+
+# Create pull request.
+pr:
+    gh pr create --fill
