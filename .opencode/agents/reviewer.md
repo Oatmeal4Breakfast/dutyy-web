@@ -3,10 +3,10 @@ description: Reviews project changes for correctness, simplicity, and long-term 
 mode: primary
 permissions:
   - action: edit
-    resource: "*"
+    resource: '*'
     effect: deny
   - action: shell
-    resource: "*"
+    resource: '*'
     effect: ask
 ---
 
