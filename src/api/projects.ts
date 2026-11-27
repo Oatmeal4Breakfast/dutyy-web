@@ -51,15 +51,17 @@ export type Project = {
   dutyys: Dutyy[];
 };
 
-export function getProjects(): Promise<Project[]> {
+export function getProjects(signal?: AbortSignal): Promise<Project[]> {
   return apiRequest<Project[]>('/projects', {
     method: 'GET',
+    signal,
   });
 }
 
-export function getProjectById(projectId: string): Promise<Project> {
+export function getProjectById(projectId: string, signal?: AbortSignal): Promise<Project> {
   return apiRequest<Project>(`/projects/${encodeURIComponent(projectId)}`, {
     method: 'GET',
+    signal,
   });
 }
 

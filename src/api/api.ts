@@ -22,9 +22,10 @@ export type APIKey = {
   'api-key': string;
 };
 
-export function getApiKeys(): Promise<APIKeyResponse[]> {
+export function getApiKeys(signal?: AbortSignal): Promise<APIKeyResponse[]> {
   return apiRequest('/api-keys', {
     method: 'GET',
+    signal,
   });
 }
 
