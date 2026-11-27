@@ -1,133 +1,25 @@
-import { useEffect, useState } from 'react';
-import type {
-  CreateDutyyRequest,
-  PatchDutyyRequest,
-  Project,
-  UpdateProjectRequest,
-} from '../api/projects';
-import {
-  addDutyy,
-  deleteDutyy,
-  deleteProject,
-  getProjectById,
-  getProjects,
-  patchDutyy,
-  patchProject,
-} from '../api/projects';
+import { useState } from 'react';
+
 import CreateProjectForm from '../components/CreateProjectForm';
-import { ApiError } from '../api/client';
 import ProjectsList from '../components/ProjectsList';
 import type { ProjectActions } from '../components/ProjectRow';
+import useProjects from '../hooks/useProjects';
 
-export default function DashboardPage() {
+type DashboardPageProps = {
+  userId: string;
+};
+
+export default function DashboardPage({ userId }: DashboardPageProps) {
   const [showCreateProjectForm, setShowCreateProjectForm] = useState<boolean>(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
-  const [projectsError, setProjectsError] = useState<string | null>(null);
-  const [projectLoadAttempt, setProjectLoadAttempt] = useState<number>(0);
-  const [actionsError, setActionsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadProjects() {
-      setProjectsError(null);
-      setLoadingProjects(true);
-      try {
-        const results = await getProjects();
-        if (active) {
-          setProjects(results);
-        }
-      } catch (error) {
-        if (!active) return;
-
-        if (error instanceof ApiError) {
-          setProjectsError(String(error.getDetail() ?? error.message));
-        } else {
-          setProjectsError('Unable to load projects');
-        }
-      } finally {
-        if (active) {
-          setLoadingProjects(false);
-        }
-      }
-    }
-
-    void loadProjects();
-
-    return () => {
-      active = false;
-    };
-  }, [projectLoadAttempt]);
-
-  async function refreshProject(projectId: string): Promise<void> {
-    const updatedProject = await getProjectById(projectId);
-
-    setProjects((current) =>
-      current.map((project) => (project.id === updatedProject.id ? updatedProject : project)),
-    );
-  }
-
-  async function completeProject(projectId: string): Promise<void> {
-    setActionsError(null);
-
-    try {
-      await patchProject(projectId, { status: 'complete' });
-      await refreshProject(projectId);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setActionsError(String(error.getDetail() ?? error.message));
-      } else {
-        setActionsError('Could not mark project as complete');
-      }
-    }
-  }
-
-  async function addDutyyToProject(projectId: string, payload: CreateDutyyRequest): Promise<void> {
-    setActionsError(null);
-    await addDutyy(projectId, payload);
-    await refreshProject(projectId);
-  }
-
-  async function editProject(projectId: string, payload: UpdateProjectRequest): Promise<void> {
-    setActionsError(null);
-    await patchProject(projectId, payload);
-    await refreshProject(projectId);
-  }
-
-  async function editDutyy(
-    projectId: string,
-    dutyyId: string,
-    payload: PatchDutyyRequest,
-  ): Promise<void> {
-    await patchDutyy(dutyyId, payload);
-    await refreshProject(projectId);
-  }
-
-  async function completeDutyy(projectId: string, dutyyId: string): Promise<void> {
-    await patchDutyy(dutyyId, { status: 'complete' });
-    await refreshProject(projectId);
-  }
-
-  async function removeDutyy(projectId: string, dutyyId: string): Promise<void> {
-    await deleteDutyy(projectId, dutyyId);
-    await refreshProject(projectId);
-  }
-
-  async function removeProject(projectId: string): Promise<void> {
-    setActionsError(null);
-    await deleteProject(projectId);
-    setProjects((current) => current.filter((project) => project.id !== projectId));
-  }
-
+  const projectsState = useProjects(userId);
   const projectActions: ProjectActions = {
-    completeProject,
-    addDutyyToProject,
-    editProject,
-    editDutyy,
-    completeDutyy,
-    removeDutyy,
-    removeProject,
+    completeProject: projectsState.completeProject,
+    addDutyyToProject: projectsState.addDutyyToProject,
+    editProject: projectsState.editProject,
+    editDutyy: projectsState.editDutyy,
+    completeDutyy: projectsState.completeDutyy,
+    removeDutyy: projectsState.removeDutyy,
+    removeProject: projectsState.removeProject,
   };
 
   return (
@@ -147,37 +39,33 @@ export default function DashboardPage() {
           {showCreateProjectForm && (
             <section id="create-project-panel" className="create-project-panel">
               <h2>Create Project</h2>
-              <CreateProjectForm
-                onCreated={(project) => {
-                  setProjects((current) => [...current, project]);
-                }}
-              />
+              <CreateProjectForm createProject={projectsState.createProject} />
             </section>
           )}
         </div>
-        {loadingProjects && (
+        {projectsState.loading && (
           <p className="loading-projects-status" role="status">
             Loading Projects
           </p>
         )}
-        {!loadingProjects && projectsError && (
+        {!projectsState.loading && projectsState.loadError && (
           <div>
-            <p role="alert">{projectsError}</p>
-            <button
-              type="button"
-              onClick={() => {
-                setProjectLoadAttempt((current) => current + 1);
-              }}
-            >
+            <p role="alert">{projectsState.loadError}</p>
+            <button type="button" onClick={() => void projectsState.retry()}>
               Try again
             </button>
           </div>
         )}
-        {!loadingProjects && !projectsError && projects.length === 0 && <p>No projects yet.</p>}
-        {!loadingProjects && !projectsError && projects.length > 0 && (
-          <ProjectsList projects={projects} actions={projectActions}></ProjectsList>
-        )}
-        {actionsError && <p role="alert">{actionsError}</p>}
+        {!projectsState.loading &&
+          !projectsState.loadError &&
+          projectsState.projects.length === 0 && <p>No projects yet.</p>}
+        {!projectsState.loading &&
+          !projectsState.loadError &&
+          projectsState.projects.length > 0 && (
+            <ProjectsList projects={projectsState.projects} actions={projectActions} />
+          )}
+        {projectsState.refreshing && <p role="status">Refreshing projects...</p>}
+        {projectsState.refreshError && <p role="alert">{projectsState.refreshError}</p>}
       </section>
     </main>
   );

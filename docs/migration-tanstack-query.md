@@ -320,17 +320,17 @@ background reconciliation should be presented as a refresh problem, not as
 
 #### Component behavior
 
-- [ ] Make `DashboardPage` a composition layer for query results and local form
+- [x] Make `DashboardPage` a composition layer for query results and local form
       visibility.
-- [ ] Move mutation pending/error state into mutation hooks where appropriate.
-- [ ] Preserve API payload validation in `src/api/projects.ts`.
-- [ ] Prefer selected project/dutyy IDs for modals rather than complete object
+- [x] Move mutation pending/error state into mutation hooks where appropriate.
+- [x] Preserve API payload validation in `src/api/projects.ts`.
+- [x] Prefer selected project/dutyy IDs for modals rather than complete object
       snapshots.
-- [ ] Resolve current modal objects from query data so background refreshes do
+- [x] Resolve current modal objects from query data so background refreshes do
       not leave stale snapshots.
-- [ ] Standardize action contracts so mutation failures reject and initiating
+- [x] Standardize action contracts so mutation failures reject and initiating
       components decide how to present them.
-- [ ] Keep background invalidation failures separate from mutation failures.
+- [x] Keep background invalidation failures separate from mutation failures.
 
 ### Phase 5: Migrate session state
 

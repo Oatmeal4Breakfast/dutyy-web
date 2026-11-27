@@ -3,13 +3,13 @@ import { Check, Ellipsis, SquarePen, Trash } from 'lucide-react';
 import type { Dutyy } from '../api/projects';
 import { ApiError } from '../api/client';
 import type { ProjectActions } from './ProjectRow';
-import EditDutyyModal from './EditDutyyModal';
 import './DutyyRow.css';
 
 type DutyyRowProps = {
   projectId: string;
   dutyy: Dutyy;
   actions: ProjectActions;
+  onRequestEdit: () => void;
 };
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -19,10 +19,9 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export default function DutyyRow({ projectId, dutyy, actions }: DutyyRowProps) {
+export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: DutyyRowProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +65,7 @@ export default function DutyyRow({ projectId, dutyy, actions }: DutyyRowProps) {
       await actions.removeDutyy(projectId, dutyy.id);
     } catch (error) {
       setActionError(getErrorMessage(error, 'Unable to delete dutyy'));
+    } finally {
       setIsDeleting(false);
     }
   }
@@ -142,7 +142,7 @@ export default function DutyyRow({ projectId, dutyy, actions }: DutyyRowProps) {
                   role="menuitem"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    setIsEditing(true);
+                    onRequestEdit();
                   }}
                 >
                   <SquarePen aria-hidden="true" />
@@ -169,15 +169,6 @@ export default function DutyyRow({ projectId, dutyy, actions }: DutyyRowProps) {
         <p className="dutyy-row__error" role="alert">
           {actionError}
         </p>
-      )}
-
-      {isEditing && (
-        <EditDutyyModal
-          dutyy={dutyy}
-          projectId={projectId}
-          editDutyy={actions.editDutyy}
-          onClose={() => setIsEditing(false)}
-        />
       )}
     </li>
   );

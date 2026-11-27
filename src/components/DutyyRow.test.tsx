@@ -18,14 +18,23 @@ function makeActions(overrides: Partial<ProjectActions> = {}): ProjectActions {
   };
 }
 
-function renderRow(actions: ProjectActions, status: 'new' | 'in_progress' | 'complete' = 'new') {
+function renderRow(
+  actions: ProjectActions,
+  status: 'new' | 'in_progress' | 'complete' = 'new',
+  onRequestEdit = vi.fn(),
+) {
   const dutyy = makeDutyy({ status });
   render(
     <ul>
-      <DutyyRow projectId="project-1" dutyy={dutyy} actions={actions} />
+      <DutyyRow
+        projectId="project-1"
+        dutyy={dutyy}
+        actions={actions}
+        onRequestEdit={onRequestEdit}
+      />
     </ul>,
   );
-  return dutyy;
+  return { dutyy, onRequestEdit };
 }
 
 describe('DutyyRow', () => {
@@ -34,7 +43,7 @@ describe('DutyyRow', () => {
       const user = userEvent.setup();
       const completeDutyy = vi.fn().mockResolvedValue(undefined);
       const actions = makeActions({ completeDutyy });
-      const dutyy = renderRow(actions);
+      const { dutyy } = renderRow(actions);
 
       await user.click(screen.getByRole('button', { name: 'Complete Buy groceries' }));
 
@@ -76,6 +85,18 @@ describe('DutyyRow', () => {
       expect(screen.queryByRole('menu')).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
+
+    it('requests editing through the parent selection boundary', async () => {
+      const user = userEvent.setup();
+      const onRequestEdit = vi.fn();
+      renderRow(makeActions(), 'new', onRequestEdit);
+
+      await user.click(screen.getByRole('button', { name: 'More actions for Buy groceries' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Edit' }));
+
+      expect(onRequestEdit).toHaveBeenCalledOnce();
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
   });
 
   describe('deletion', () => {
@@ -99,12 +120,13 @@ describe('DutyyRow', () => {
       const user = userEvent.setup();
       const removeDutyy = vi.fn().mockResolvedValue(undefined);
       vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const dutyy = renderRow(makeActions({ removeDutyy }));
+      const { dutyy } = renderRow(makeActions({ removeDutyy }));
 
       await user.click(screen.getByRole('button', { name: 'More actions for Buy groceries' }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete Buy groceries' }));
 
       await waitFor(() => expect(removeDutyy).toHaveBeenCalledWith('project-1', dutyy.id));
+      expect(screen.getByRole('menuitem', { name: 'Delete Buy groceries' })).toBeEnabled();
     });
   });
 });

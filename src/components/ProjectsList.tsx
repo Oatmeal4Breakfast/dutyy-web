@@ -3,6 +3,7 @@ import type { Project } from '../api/projects';
 import type { ProjectActions } from './ProjectRow';
 import ProjectRow from './ProjectRow';
 import { AddDutyyToProjectModal } from './AddDutyyToProjectModal';
+import EditDutyyModal from './EditDutyyModal';
 import { EditProjectModal } from './EditProjectModal';
 import './ProjectsList.css';
 
@@ -17,8 +18,12 @@ type ProjectsListProps = {
 export default function ProjectsList({ projects, actions }: ProjectsListProps) {
   const [sortKey, setSortKey] = useState<SortKey>('status');
   const [projectView, setProjectView] = useState<ProjectView>('active');
-  const [addDutyyProject, setAddDutyyProject] = useState<Project | null>(null);
-  const [projectBeingEdited, setProjectBeingEdited] = useState<Project | null>(null);
+  const [addDutyyProjectId, setAddDutyyProjectId] = useState<string | null>(null);
+  const [editedProjectId, setEditedProjectId] = useState<string | null>(null);
+  const [editedDutyyIds, setEditedDutyyIds] = useState<{
+    projectId: string;
+    dutyyId: string;
+  } | null>(null);
 
   function getLastActivity(project: Project): string {
     return project.modified_date ?? project.created_date;
@@ -49,6 +54,12 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
     }
     return b[sortKey].localeCompare(a[sortKey]);
   });
+  const addDutyyProject = projects.find((project) => project.id === addDutyyProjectId);
+  const editedProject = projects.find((project) => project.id === editedProjectId);
+  const editedDutyyProject = projects.find((project) => project.id === editedDutyyIds?.projectId);
+  const editedDutyy = editedDutyyProject?.dutyys.find(
+    (dutyy) => dutyy.id === editedDutyyIds?.dutyyId,
+  );
 
   return (
     <div className="projects-list">
@@ -104,8 +115,11 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
                   completed={completedDutyys}
                   lastActivity={lastActivity}
                   actions={actions}
-                  onRequestAddDutyy={() => setAddDutyyProject(project)}
-                  onRequestEditProject={() => setProjectBeingEdited(project)}
+                  onRequestAddDutyy={() => setAddDutyyProjectId(project.id)}
+                  onRequestEditProject={() => setEditedProjectId(project.id)}
+                  onRequestEditDutyy={(dutyyId) =>
+                    setEditedDutyyIds({ projectId: project.id, dutyyId })
+                  }
                 />
               );
             })}
@@ -117,16 +131,25 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
           projectId={addDutyyProject.id}
           projectName={addDutyyProject.name}
           addDutyy={actions.addDutyyToProject}
-          onClose={() => setAddDutyyProject(null)}
+          onClose={() => setAddDutyyProjectId(null)}
         />
       )}
-      {projectBeingEdited && (
+      {editedProject && (
         <EditProjectModal
-          projectId={projectBeingEdited.id}
-          currentProjectName={projectBeingEdited.name}
-          currentProjectStatus={projectBeingEdited.status}
+          projectId={editedProject.id}
+          currentProjectName={editedProject.name}
+          currentProjectStatus={editedProject.status}
           editProject={actions.editProject}
-          onClose={() => setProjectBeingEdited(null)}
+          onClose={() => setEditedProjectId(null)}
+        />
+      )}
+      {editedDutyyIds && editedDutyy && (
+        <EditDutyyModal
+          key={`${editedDutyyIds.projectId}:${editedDutyyIds.dutyyId}`}
+          dutyy={editedDutyy}
+          projectId={editedDutyyIds.projectId}
+          editDutyy={actions.editDutyy}
+          onClose={() => setEditedDutyyIds(null)}
         />
       )}
     </div>

@@ -16,6 +16,7 @@ type ProjectRowProps = {
   actions: ProjectActions;
   onRequestAddDutyy: () => void;
   onRequestEditProject: () => void;
+  onRequestEditDutyy: (dutyyId: string) => void;
 };
 
 export type ProjectActions = {
@@ -35,18 +36,26 @@ export default function ProjectRow({
   actions,
   onRequestAddDutyy,
   onRequestEditProject,
+  onRequestEditDutyy,
 }: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
   const [isCompleting, setIsCompleting] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const dutyysId = `project-${project.id}-dutyys`;
 
   async function handleCompleteProject(): Promise<void> {
+    setActionError(null);
     setIsCompleting(true);
 
     try {
       await actions.completeProject(project.id);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setActionError(String(error.getDetail() ?? error.message));
+      } else {
+        setActionError('Could not mark project as complete');
+      }
     } finally {
       setIsCompleting(false);
     }
@@ -59,16 +68,16 @@ export default function ProjectRow({
       return;
     }
 
-    setDeleteError(null);
+    setActionError(null);
     setIsDeleting(true);
 
     try {
       await actions.removeProject(project.id);
     } catch (error) {
       if (error instanceof ApiError) {
-        setDeleteError(String(error.getDetail() ?? error.message));
+        setActionError(String(error.getDetail() ?? error.message));
       } else {
-        setDeleteError('Unable to delete project');
+        setActionError('Unable to delete project');
       }
     } finally {
       setIsDeleting(false);
@@ -152,10 +161,10 @@ export default function ProjectRow({
           </div>
         </td>
       </tr>
-      {deleteError && (
+      {actionError && (
         <tr className="project-row__error-row">
           <td colSpan={5} className="project-row__error-cell">
-            <p role="alert">{deleteError}</p>
+            <p role="alert">{actionError}</p>
           </td>
         </tr>
       )}
@@ -165,7 +174,13 @@ export default function ProjectRow({
             {project.dutyys.length > 0 ? (
               <ul className="project-dutyys-list">
                 {project.dutyys.map((dutyy) => (
-                  <DutyyRow key={dutyy.id} projectId={project.id} dutyy={dutyy} actions={actions} />
+                  <DutyyRow
+                    key={dutyy.id}
+                    projectId={project.id}
+                    dutyy={dutyy}
+                    actions={actions}
+                    onRequestEdit={() => onRequestEditDutyy(dutyy.id)}
+                  />
                 ))}
               </ul>
             ) : (
