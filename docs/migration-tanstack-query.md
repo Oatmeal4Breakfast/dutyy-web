@@ -263,33 +263,32 @@ using Query.
 
 #### Query behavior
 
-- [ ] Let `useQuery` own API-key history data.
-- [ ] Sort newest-first with a pure query selection/transformation.
-- [ ] Derive initial loading from pending state.
-- [ ] Derive background refresh from fetching state when data already exists.
-- [ ] Represent an initial load error as an error with no cached data.
-- [ ] Preserve cached data when a background refresh fails.
+- [x] Let `useQuery` own API-key history data.
+- [x] Sort newest-first with a pure query selection/transformation.
+- [x] Derive initial loading from pending state.
+- [x] Derive background refresh from fetching state when data already exists.
+- [x] Represent an initial load error as an error with no cached data.
+- [x] Preserve cached data when a background refresh fails.
 
 #### Issue behavior
 
-- [ ] Keep the issued secret in `ApiKeyIssuePanel`.
-- [ ] Never store the issue mutation result in query data.
-- [ ] Refetch or invalidate API-key history after issuance.
-- [ ] Preserve the secret and show the existing contextual warning if the
+- [x] Keep the issued secret in `ApiKeyIssuePanel`.
+- [x] Never store the issue mutation result in query data.
+- [x] Refetch or invalidate API-key history after issuance.
+- [x] Preserve the secret and show the existing contextual warning if the
       refresh fails.
 
 #### Revoke behavior
 
 On successful revoke:
 
-1. Update the history cache immediately to mark the key inactive.
-2. Trigger a background invalidation/refetch.
-3. If reconciliation fails, preserve the inactive local result and show the
-   existing warning.
-
-Use a mutation key with `useMutationState`, or row-owned mutation hooks, to
-derive pending key IDs. Do not replace per-key pending state with one
-page-level boolean.
+- [x] Update the history cache immediately to mark the key inactive.
+- [x] Trigger a background invalidation/refetch.
+- [x] If reconciliation fails, preserve the inactive local result and show the
+      existing warning.
+- [x] Use a mutation key with `useMutationState`, or row-owned mutation hooks,
+      to derive pending key IDs. Do not replace per-key pending state with one
+      page-level boolean.
 
 ### Phase 4: Migrate projects
 
