@@ -80,7 +80,7 @@ function App() {
         />
         <Route
           path="/dashboard"
-          element={user ? <DashboardPage /> : <Navigate to="/login" replace />}
+          element={user ? <DashboardPage userId={user.id} /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/settings"

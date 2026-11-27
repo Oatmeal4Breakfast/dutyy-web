@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { ApiError } from '../api/client';
-import { createProject, type CreateProjectRequest, type Project } from '../api/projects';
+import type { CreateProjectRequest, Project } from '../api/projects';
 
 type DutyyDraft = {
   clientId: string;
@@ -10,10 +10,10 @@ type DutyyDraft = {
 };
 
 type CreateProjectFormProps = {
-  onCreated: (project: Project) => void;
+  createProject: (payload: CreateProjectRequest) => Promise<Project>;
 };
 
-export default function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
+export default function CreateProjectForm({ createProject }: CreateProjectFormProps) {
   const [projectName, setProjectName] = useState<string>('');
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [dutyys, setDutyys] = useState<DutyyDraft[]>([]);
@@ -61,7 +61,6 @@ export default function CreateProjectForm({ onCreated }: CreateProjectFormProps)
 
     try {
       const project = await createProject(newProject);
-      onCreated(project);
       setProjectName('');
       setDutyys([]);
       setSuccess(`Project "${project.name}" created.`);
