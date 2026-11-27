@@ -1,12 +1,19 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
+import { apiKeyKeys } from '../queries/queryKeys';
 import { makeApiKey } from '../test/fixtures';
+import { renderWithQueryClient } from '../test/renderWithQueryClient';
 import { server } from '../test/server';
 import ApiKeysPage from './ApiKeysPage';
 
 const API = '*/dutyy/api/v1';
+const USER_ID = 'user-1';
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+
+function renderPage() {
+  return renderWithQueryClient(<ApiKeysPage userId={USER_ID} />);
+}
 
 describe('ApiKeysPage', () => {
   afterEach(() => {
@@ -36,7 +43,7 @@ describe('ApiKeysPage', () => {
       ),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     expect(await screen.findByText('Laptop CLI')).toBeVisible();
     expect(screen.getByText('Old laptop')).toBeVisible();
@@ -72,7 +79,7 @@ describe('ApiKeysPage', () => {
       }),
     );
 
-    render(<ApiKeysPage />);
+    const { queryClient } = renderPage();
 
     await screen.findByText('No API keys have been issued yet.');
     await user.type(screen.getByLabelText('Key name'), '  Desktop CLI  ');
@@ -82,6 +89,10 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByDisplayValue('dty_one-time-secret')).toBeVisible();
     expect(requestBody).toEqual({ key_name: 'Desktop CLI', ttl: '90d' });
     expect(await screen.findByText('Desktop CLI')).toBeVisible();
+    expect(queryClient.getQueryData(apiKeyKeys.list(USER_ID))).toEqual([issuedSummary]);
+    expect(JSON.stringify(queryClient.getQueryCache().getAll())).not.toContain(
+      'dty_one-time-secret',
+    );
     expect(screen.getByLabelText('Key name')).toBeDisabled();
 
     await user.click(screen.getByRole('button', { name: 'Copy key' }));
@@ -111,7 +122,7 @@ describe('ApiKeysPage', () => {
       ),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     await screen.findByText('No API keys have been issued yet.');
     await user.type(screen.getByLabelText('Key name'), 'CI');
@@ -155,7 +166,7 @@ describe('ApiKeysPage', () => {
       ),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     expect(screen.getByRole('heading', { name: 'Issue an API key' })).toBeVisible();
     await initialRequestStarted;
@@ -188,7 +199,7 @@ describe('ApiKeysPage', () => {
       ),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     expect(await screen.findByRole('alert')).toHaveTextContent('database unavailable');
     await user.type(screen.getByLabelText('Key name'), 'Recovery CLI');
@@ -208,7 +219,7 @@ describe('ApiKeysPage', () => {
       ),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     await screen.findByText('No API keys have been issued yet.');
     await user.type(screen.getByLabelText('Key name'), 'Laptop CLI');
@@ -232,7 +243,7 @@ describe('ApiKeysPage', () => {
       }),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     await screen.findByText('No API keys have been issued yet.');
     await user.type(screen.getByLabelText('Key name'), 'Laptop CLI');
@@ -261,7 +272,7 @@ describe('ApiKeysPage', () => {
       }),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     await user.click(await screen.findByRole('button', { name: 'Revoke Laptop CLI' }));
 
@@ -270,6 +281,34 @@ describe('ApiKeysPage', () => {
     );
     expect(await screen.findByText('Revoked')).toBeVisible();
     expect(revokedId).toBe('api-key-1');
+    expect(screen.getByText('Laptop CLI')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Revoke Laptop CLI' })).not.toBeInTheDocument();
+  });
+
+  it('keeps a key revoked when refreshing history fails', async () => {
+    const user = userEvent.setup();
+    const activeKey = makeApiKey();
+    let listRequests = 0;
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    server.use(
+      http.get(`${API}/api-keys`, () => {
+        listRequests += 1;
+        return listRequests === 1
+          ? HttpResponse.json([activeKey])
+          : HttpResponse.json({ detail: 'database unavailable' }, { status: 503 });
+      }),
+      http.delete(`${API}/api-keys/:keyId`, () => new HttpResponse(null, { status: 204 })),
+    );
+
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Revoke Laptop CLI' }));
+
+    expect(await screen.findByText('Revoked')).toBeVisible();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The API key was revoked, but the key history could not be refreshed.',
+    );
     expect(screen.getByText('Laptop CLI')).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Revoke Laptop CLI' })).not.toBeInTheDocument();
   });
@@ -323,7 +362,7 @@ describe('ApiKeysPage', () => {
       }),
     );
 
-    render(<ApiKeysPage />);
+    renderPage();
 
     await user.click(await screen.findByRole('button', { name: 'Revoke Laptop CLI' }));
     await firstStarted;

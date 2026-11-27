@@ -1,8 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { deleteAPIKey, getApiKeys, type APIKeyResponse } from '../api/api';
 import { ApiError } from '../api/client';
+import { apiKeyKeys } from '../queries/queryKeys';
 
-type HistoryLoadResult = 'success' | 'failed' | 'superseded';
+type HistoryLoadResult = 'success' | 'failed';
+
+type RefreshFailure = {
+  errorUpdatedAt: number;
+  message: string;
+};
+
+const REVOKE_REFRESH_ERROR = 'The API key was revoked, but the key history could not be refreshed.';
 
 function sortNewestFirst(keys: APIKeyResponse[]): APIKeyResponse[] {
   return [...keys].sort(
@@ -17,124 +27,104 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return detail ? String(detail) : error.message;
 }
 
-export default function useApiKeyHistory() {
-  const [keys, setKeys] = useState<APIKeyResponse[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
+function revokeMutationKey(userId: string) {
+  return [...apiKeyKeys.byUser(userId), 'revoke'] as const;
+}
+
+export default function useApiKeyHistory(userId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = apiKeyKeys.list(userId);
+  const [refreshFailure, setRefreshFailure] = useState<RefreshFailure | null>(null);
   const [revokeError, setRevokeError] = useState<string | null>(null);
-  const [revokingIds, setRevokingIds] = useState<Set<string>>(() => new Set());
-  const requestSequence = useRef<number>(0);
-
-  const executeLoad = useCallback(
-    async (
-      requestId: number,
-      mode: 'initial' | 'refresh',
-      failureMessage: string,
-    ): Promise<HistoryLoadResult> => {
-      try {
-        const results = await getApiKeys();
-
-        if (requestId !== requestSequence.current) {
-          return 'superseded';
-        }
-
-        setKeys(sortNewestFirst(results));
-        return 'success';
-      } catch (error) {
-        if (requestId !== requestSequence.current) {
-          return 'superseded';
-        }
-
-        if (mode === 'initial') {
-          setLoadError(getErrorMessage(error, 'Unable to load API keys'));
-        } else {
-          setRefreshError(failureMessage);
-        }
-        return 'failed';
-      } finally {
-        if (requestId === requestSequence.current) {
-          setLoading(false);
-          setRefreshing(false);
-        }
-      }
-    },
-    [],
-  );
-
-  const loadKeys = useCallback(
-    (
-      mode: 'initial' | 'refresh',
-      failureMessage = 'Unable to refresh API key history.',
-    ): Promise<HistoryLoadResult> => {
-      const requestId = ++requestSequence.current;
-
-      if (mode === 'initial') {
-        setLoading(true);
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-        setRefreshing(true);
-      }
-      setLoadError(null);
-      setRefreshError(null);
-
-      return executeLoad(requestId, mode, failureMessage);
-    },
-    [executeLoad],
-  );
-
-  useEffect(() => {
-    const requestId = ++requestSequence.current;
-    void executeLoad(requestId, 'initial', 'Unable to load API keys');
-
-    return () => {
-      requestSequence.current += 1;
-    };
-  }, [executeLoad]);
-
-  const retry = useCallback(() => loadKeys('initial'), [loadKeys]);
+  const historyQuery = useQuery({
+    queryKey,
+    queryFn: ({ signal }) => getApiKeys(signal),
+    select: sortNewestFirst,
+  });
 
   const refresh = useCallback(
-    (failureMessage?: string) => loadKeys('refresh', failureMessage),
-    [loadKeys],
+    async (failureMessage = 'Unable to refresh API key history.'): Promise<HistoryLoadResult> => {
+      setRefreshFailure(null);
+      await queryClient.cancelQueries({ queryKey, exact: true });
+
+      const result = await historyQuery.refetch();
+      if (result.isError) {
+        setRefreshFailure({
+          errorUpdatedAt: result.errorUpdatedAt,
+          message: failureMessage,
+        });
+        return 'failed';
+      }
+
+      return 'success';
+    },
+    [historyQuery, queryClient, queryKey],
   );
+
+  const retry = useCallback(async (): Promise<HistoryLoadResult> => {
+    setRefreshFailure(null);
+    const result = await historyQuery.refetch();
+    return result.isError ? 'failed' : 'success';
+  }, [historyQuery]);
+
+  const revokeMutation = useMutation({
+    mutationKey: revokeMutationKey(userId),
+    mutationFn: (key: APIKeyResponse) => deleteAPIKey(key.id),
+    onMutate: () => {
+      setRevokeError(null);
+    },
+    onSuccess: (_, key) => {
+      queryClient.setQueryData<APIKeyResponse[]>(queryKey, (current) =>
+        current?.map((currentKey) =>
+          currentKey.id === key.id ? { ...currentKey, status: 'inactive' } : currentKey,
+        ),
+      );
+      void refresh(REVOKE_REFRESH_ERROR);
+    },
+    onError: (error) => {
+      setRevokeError(getErrorMessage(error, 'Unable to revoke API key'));
+    },
+  });
+
+  const pendingRevocationIds = useMutationState({
+    filters: {
+      mutationKey: revokeMutationKey(userId),
+      status: 'pending',
+    },
+    select: (mutation) => (mutation.state.variables as APIKeyResponse).id,
+  });
 
   const revoke = useCallback(
     async (key: APIKeyResponse): Promise<void> => {
-      setRevokeError(null);
-      setRevokingIds((current) => new Set(current).add(key.id));
-
       try {
-        await deleteAPIKey(key.id);
-        setKeys((current) =>
-          current.map((currentKey) =>
-            currentKey.id === key.id ? { ...currentKey, status: 'inactive' } : currentKey,
-          ),
-        );
-        await refresh('The API key was revoked, but the key history could not be refreshed.');
-      } catch (error) {
-        setRevokeError(getErrorMessage(error, 'Unable to revoke API key'));
-      } finally {
-        setRevokingIds((current) => {
-          const next = new Set(current);
-          next.delete(key.id);
-          return next;
-        });
+        await revokeMutation.mutateAsync(key);
+      } catch {
+        // The mutation callback exposes the error through the hook's existing UI contract.
       }
     },
-    [refresh],
+    [revokeMutation],
   );
 
+  const loading = historyQuery.data === undefined && historyQuery.isFetching;
+  const loadError =
+    !loading && historyQuery.data === undefined && historyQuery.error
+      ? getErrorMessage(historyQuery.error, 'Unable to load API keys')
+      : null;
+  const backgroundQueryError =
+    historyQuery.data !== undefined && historyQuery.error
+      ? refreshFailure?.errorUpdatedAt === historyQuery.errorUpdatedAt
+        ? refreshFailure.message
+        : getErrorMessage(historyQuery.error, 'Unable to refresh API key history.')
+      : null;
+
   return {
-    keys,
+    keys: historyQuery.data ?? [],
     loading,
-    refreshing,
+    refreshing: historyQuery.data !== undefined && historyQuery.isFetching,
     loadError,
-    refreshError,
+    refreshError: backgroundQueryError,
     revokeError,
-    revokingIds,
+    revokingIds: new Set(pendingRevocationIds),
     retry,
     refresh,
     revoke,

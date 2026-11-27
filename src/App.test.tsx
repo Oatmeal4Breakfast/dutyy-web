@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
@@ -6,13 +6,14 @@ import { MemoryRouter } from 'react-router';
 import App from './App';
 import { clearEstablishedSession } from './api/client';
 import { makeProject, makeSession, makeUser } from './test/fixtures';
+import { renderWithQueryClient } from './test/renderWithQueryClient';
 import { server } from './test/server';
 
 const API = '*/dutyy/api/v1';
 const SESSION_EXPIRED_MESSAGE = 'Your session expired. Please log in again.';
 
 function renderApp(path: string) {
-  render(
+  renderWithQueryClient(
     <MemoryRouter initialEntries={[path]}>
       <App />
     </MemoryRouter>,

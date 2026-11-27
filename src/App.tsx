@@ -90,7 +90,7 @@ function App() {
         />
         <Route
           path="/settings/api-keys"
-          element={user ? <ApiKeysPage /> : <Navigate to="/login" replace />}
+          element={user ? <ApiKeysPage userId={user.id} /> : <Navigate to="/login" replace />}
         />
         <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

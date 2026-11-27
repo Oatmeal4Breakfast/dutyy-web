@@ -3,8 +3,12 @@ import ApiKeyIssuePanel from '../components/ApiKeyIssuePanel';
 import useApiKeyHistory from '../hooks/useApiKeyHistory';
 import './ApiKeysPage.css';
 
-export default function ApiKeysPage() {
-  const history = useApiKeyHistory();
+type ApiKeysPageProps = {
+  userId: string;
+};
+
+export default function ApiKeysPage({ userId }: ApiKeysPageProps) {
+  const history = useApiKeyHistory(userId);
 
   return (
     <main className="api-keys-page">
