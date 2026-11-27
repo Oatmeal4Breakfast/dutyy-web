@@ -69,6 +69,19 @@ describe('DutyyRow', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent('Completion unavailable');
       expect(screen.getByText('Buy groceries')).toBeVisible();
     });
+
+    it('does not allow a confirmed completion to be repeated while data is stale', async () => {
+      const user = userEvent.setup();
+      const completeDutyy = vi.fn().mockResolvedValue(undefined);
+      renderRow(makeActions({ completeDutyy }));
+
+      const completeButton = screen.getByRole('button', { name: 'Complete Buy groceries' });
+      await user.click(completeButton);
+      await user.click(completeButton);
+
+      expect(completeDutyy).toHaveBeenCalledOnce();
+      expect(completeButton).toBeDisabled();
+    });
   });
 
   describe('overflow menu', () => {
@@ -126,7 +139,10 @@ describe('DutyyRow', () => {
       await user.click(screen.getByRole('menuitem', { name: 'Delete Buy groceries' }));
 
       await waitFor(() => expect(removeDutyy).toHaveBeenCalledWith('project-1', dutyy.id));
-      expect(screen.getByRole('menuitem', { name: 'Delete Buy groceries' })).toBeEnabled();
+      expect(screen.getByText('Deleted')).toBeVisible();
+      expect(screen.getByRole('button', { name: 'More actions for Buy groceries' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Complete Buy groceries' })).toBeDisabled();
+      expect(removeDutyy).toHaveBeenCalledOnce();
     });
   });
 });

@@ -22,6 +22,8 @@ function getErrorMessage(error: unknown, fallback: string): string {
 export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: DutyyRowProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [completionAccepted, setCompletionAccepted] = useState(false);
+  const [deletionAccepted, setDeletionAccepted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +50,7 @@ export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: D
     setIsCompleting(true);
     try {
       await actions.completeDutyy(projectId, dutyy.id);
+      setCompletionAccepted(true);
     } catch (error) {
       setActionError(getErrorMessage(error, 'Unable to complete dutyy'));
     } finally {
@@ -63,6 +66,8 @@ export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: D
     setIsDeleting(true);
     try {
       await actions.removeDutyy(projectId, dutyy.id);
+      setDeletionAccepted(true);
+      setIsMenuOpen(false);
     } catch (error) {
       setActionError(getErrorMessage(error, 'Unable to delete dutyy'));
     } finally {
@@ -111,7 +116,9 @@ export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: D
             aria-label={isCompleting ? `Completing ${dutyy.title}` : `Complete ${dutyy.title}`}
             aria-busy={isCompleting}
             onClick={() => void handleComplete()}
-            disabled={isCompleting || dutyy.status === 'complete'}
+            disabled={
+              isCompleting || completionAccepted || deletionAccepted || dutyy.status === 'complete'
+            }
           >
             <Check aria-hidden="true" />
           </button>
@@ -126,9 +133,11 @@ export default function DutyyRow({ projectId, dutyy, actions, onRequestEdit }: D
               aria-expanded={isMenuOpen}
               aria-controls={menuId}
               onClick={() => setIsMenuOpen((current) => !current)}
+              disabled={deletionAccepted}
             >
               <Ellipsis aria-hidden="true" />
             </button>
+            {deletionAccepted && <span className="dutyy-row__status">Deleted</span>}
             {isMenuOpen && (
               <div
                 id={menuId}

@@ -10,6 +10,25 @@ type EditDutyyModalProps = {
   onClose: () => void;
 };
 
+type FieldEdit<T> = {
+  value: T;
+  baseline: T;
+};
+
+function applyEdit<T>(
+  current: FieldEdit<T> | null,
+  value: T,
+  currentValue: T,
+): FieldEdit<T> | null {
+  const baseline = current?.baseline ?? currentValue;
+
+  if (value === baseline || value === currentValue) {
+    return null;
+  }
+
+  return { value, baseline };
+}
+
 export default function EditDutyyModal({
   dutyy,
   projectId,
@@ -17,9 +36,9 @@ export default function EditDutyyModal({
   onClose,
 }: EditDutyyModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [title, setTitle] = useState(dutyy.title);
-  const [details, setDetails] = useState(dutyy.details ?? '');
-  const [status, setStatus] = useState<DutyyStatus>(dutyy.status);
+  const [titleEdit, setTitleEdit] = useState<FieldEdit<string> | null>(null);
+  const [detailsEdit, setDetailsEdit] = useState<FieldEdit<string> | null>(null);
+  const [statusEdit, setStatusEdit] = useState<FieldEdit<DutyyStatus> | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const headingId = `edit-dutyy-${dutyy.id}-heading`;
@@ -27,12 +46,15 @@ export default function EditDutyyModal({
   const titleId = `edit-dutyy-${dutyy.id}-title`;
   const detailsId = `edit-dutyy-${dutyy.id}-details`;
   const statusId = `edit-dutyy-${dutyy.id}-status`;
+  const currentDetails = dutyy.details ?? '';
+  const title = titleEdit?.value ?? dutyy.title;
+  const details = detailsEdit?.value ?? currentDetails;
+  const status = statusEdit?.value ?? dutyy.status;
   const normalizedTitle = title.trim();
   const normalizedDetails = details.trim();
-  const originalDetails = (dutyy.details ?? '').trim();
-  const titleChanged = normalizedTitle !== dutyy.title;
-  const detailsChanged = normalizedDetails !== originalDetails;
-  const statusChanged = status !== dutyy.status;
+  const titleChanged = titleEdit !== null && normalizedTitle !== dutyy.title.trim();
+  const detailsChanged = detailsEdit !== null && normalizedDetails !== currentDetails.trim();
+  const statusChanged = statusEdit !== null && status !== dutyy.status;
   const hasChanges = titleChanged || detailsChanged || statusChanged;
 
   useEffect(() => {
@@ -104,7 +126,10 @@ export default function EditDutyyModal({
         <input
           id={titleId}
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value;
+            setTitleEdit((current) => applyEdit(current, value, dutyy.title));
+          }}
           disabled={isSubmitting}
           autoFocus
           required
@@ -114,7 +139,10 @@ export default function EditDutyyModal({
         <textarea
           id={detailsId}
           value={details}
-          onChange={(event) => setDetails(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value;
+            setDetailsEdit((current) => applyEdit(current, value, currentDetails));
+          }}
           disabled={isSubmitting}
           rows={5}
         />
@@ -123,7 +151,10 @@ export default function EditDutyyModal({
         <select
           id={statusId}
           value={status}
-          onChange={(event) => setStatus(event.target.value as DutyyStatus)}
+          onChange={(event) => {
+            const value = event.target.value as DutyyStatus;
+            setStatusEdit((current) => applyEdit(current, value, dutyy.status));
+          }}
           disabled={isSubmitting}
         >
           <option value="new">New</option>

@@ -1,3 +1,4 @@
+import { onlineManager } from '@tanstack/react-query';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -88,7 +89,40 @@ describe('DashboardPage project synchronization', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(REFRESH_ERROR);
     expect(screen.getByText('0 of 1')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Complete Buy groceries' })).toBeEnabled();
+    const completeButton = screen.getByRole('button', { name: 'Complete Buy groceries' });
+    expect(completeButton).toBeDisabled();
+    await user.click(completeButton);
+    expect(patchRequests).toBe(1);
+  });
+
+  it('does not allow a confirmed project completion to be repeated while data is stale', async () => {
+    const user = userEvent.setup();
+    const project = makeProject({ dutyys: [] });
+    let listRequests = 0;
+    let patchRequests = 0;
+
+    server.use(
+      http.get(`${API}/projects`, () => {
+        listRequests += 1;
+        return listRequests === 1
+          ? HttpResponse.json([project])
+          : HttpResponse.json({ detail: 'database unavailable' }, { status: 503 });
+      }),
+      http.patch(`${API}/projects/${project.id}`, () => {
+        patchRequests += 1;
+        return HttpResponse.json({ ...project, status: 'complete' });
+      }),
+    );
+
+    renderPage();
+
+    await screen.findByText(project.name);
+    const completeButton = screen.getByRole('button', { name: `Complete ${project.name}` });
+    await user.click(completeButton);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(REFRESH_ERROR);
+    expect(completeButton).toBeDisabled();
+    await user.click(completeButton);
     expect(patchRequests).toBe(1);
   });
 
@@ -136,6 +170,21 @@ describe('DashboardPage project synchronization', () => {
 
     expect(await screen.findByText(project.name)).toBeVisible();
     expect(listRequests).toBe(2);
+  });
+
+  it('shows a pending state when the initial query is paused', async () => {
+    onlineManager.setOnline(false);
+    server.use(http.get(`${API}/projects`, () => HttpResponse.json([])));
+
+    const { unmount } = renderPage();
+
+    try {
+      expect(await screen.findByRole('status')).toHaveTextContent('Loading Projects');
+      expect(screen.queryByText('No projects yet.')).not.toBeInTheDocument();
+    } finally {
+      unmount();
+      onlineManager.setOnline(true);
+    }
   });
 
   it('keeps a created project when background reconciliation fails', async () => {

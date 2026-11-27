@@ -40,6 +40,7 @@ export default function ProjectRow({
 }: ProjectRowProps) {
   const [isExpanded, setExpanded] = useState<boolean>(false);
   const [isCompleting, setIsCompleting] = useState<boolean>(false);
+  const [completionAccepted, setCompletionAccepted] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const dutyysId = `project-${project.id}-dutyys`;
@@ -50,6 +51,7 @@ export default function ProjectRow({
 
     try {
       await actions.completeProject(project.id);
+      setCompletionAccepted(true);
     } catch (error) {
       if (error instanceof ApiError) {
         setActionError(String(error.getDetail() ?? error.message));
@@ -124,7 +126,7 @@ export default function ProjectRow({
               className={`project-action-button ${isCompleting ? 'project-action-button--pending' : ''}`}
               aria-label={`Complete ${project.name}`}
               onClick={() => void handleCompleteProject()}
-              disabled={isCompleting || project.status === 'complete'}
+              disabled={isCompleting || completionAccepted || project.status === 'complete'}
             >
               <Check aria-hidden="true" />
             </button>
