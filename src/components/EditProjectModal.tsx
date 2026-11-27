@@ -11,6 +11,25 @@ export type EditProjectModalProps = {
   onClose: () => void;
 };
 
+type FieldEdit<T> = {
+  value: T;
+  baseline: T;
+};
+
+function applyEdit<T>(
+  current: FieldEdit<T> | null,
+  value: T,
+  currentValue: T,
+): FieldEdit<T> | null {
+  const baseline = current?.baseline ?? currentValue;
+
+  if (value === baseline || value === currentValue) {
+    return null;
+  }
+
+  return { value, baseline };
+}
+
 export function EditProjectModal({
   projectId,
   currentProjectName,
@@ -19,17 +38,19 @@ export function EditProjectModal({
   onClose,
 }: EditProjectModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [projectName, setProjectName] = useState<string>(currentProjectName);
-  const [projectStatus, setProjectStatus] = useState<ProjectStatus>(currentProjectStatus);
+  const [nameEdit, setNameEdit] = useState<FieldEdit<string> | null>(null);
+  const [statusEdit, setStatusEdit] = useState<FieldEdit<ProjectStatus> | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const editProjectNameId = `edit-project-${projectId}-name`;
   const editProjectStatusId = `edit-project-${projectId}-status`;
   const headingId = `edit-project-${projectId}-heading`;
   const descriptionId = `edit-project-${projectId}-description`;
+  const projectName = nameEdit?.value ?? currentProjectName;
+  const projectStatus = statusEdit?.value ?? currentProjectStatus;
   const normalizedProjectName = projectName.trim();
-  const nameChanged = normalizedProjectName !== currentProjectName;
-  const statusChanged = projectStatus !== currentProjectStatus;
+  const nameChanged = nameEdit !== null && normalizedProjectName !== currentProjectName.trim();
+  const statusChanged = statusEdit !== null && projectStatus !== currentProjectStatus;
   const hasChanges = nameChanged || statusChanged;
 
   useEffect(() => {
@@ -58,10 +79,9 @@ export function EditProjectModal({
 
     setIsSubmitting(true);
 
-    const payload = {
-      name: nameChanged ? normalizedProjectName : null,
-      status: statusChanged ? projectStatus : null,
-    } satisfies UpdateProjectRequest;
+    const payload: UpdateProjectRequest = {};
+    if (nameChanged) payload.name = normalizedProjectName;
+    if (statusChanged) payload.status = projectStatus;
 
     try {
       await editProject(projectId, payload);
@@ -103,7 +123,10 @@ export function EditProjectModal({
         <input
           id={editProjectNameId}
           value={projectName}
-          onChange={(event) => setProjectName(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value;
+            setNameEdit((current) => applyEdit(current, value, currentProjectName));
+          }}
           disabled={isSubmitting}
           autoFocus
           required
@@ -113,7 +136,10 @@ export function EditProjectModal({
         <select
           id={editProjectStatusId}
           value={projectStatus}
-          onChange={(event) => setProjectStatus(event.target.value as ProjectStatus)}
+          onChange={(event) => {
+            const value = event.target.value as ProjectStatus;
+            setStatusEdit((current) => applyEdit(current, value, currentProjectStatus));
+          }}
           disabled={isSubmitting}
         >
           <option value="new">New</option>

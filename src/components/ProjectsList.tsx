@@ -61,6 +61,16 @@ export default function ProjectsList({ projects, actions }: ProjectsListProps) {
     (dutyy) => dutyy.id === editedDutyyIds?.dutyyId,
   );
 
+  if (addDutyyProjectId && !addDutyyProject) {
+    setAddDutyyProjectId(null);
+  }
+  if (editedProjectId && !editedProject) {
+    setEditedProjectId(null);
+  }
+  if (editedDutyyIds && !editedDutyy) {
+    setEditedDutyyIds(null);
+  }
+
   return (
     <div className="projects-list">
       <div className="project-sort-controls">

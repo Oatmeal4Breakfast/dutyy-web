@@ -101,7 +101,8 @@ export default function useProjects(userId: string) {
     },
   });
 
-  const loading = projectsQuery.data === undefined && projectsQuery.isFetching;
+  const loading =
+    projectsQuery.data === undefined && (projectsQuery.isPending || projectsQuery.isFetching);
   const loadError =
     !loading && projectsQuery.data === undefined && projectsQuery.error
       ? getErrorMessage(projectsQuery.error, 'Unable to load projects')
