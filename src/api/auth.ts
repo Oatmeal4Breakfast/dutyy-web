@@ -22,8 +22,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return response;
 }
 
-export async function restoreSession(): Promise<SessionState> {
-  const session = await apiRequest<SessionState>('/auth/session');
+export async function restoreSession(signal?: AbortSignal): Promise<SessionState> {
+  const session = await apiRequest<SessionState>('/auth/session', { signal });
   markSessionEstablished();
   return session;
 }

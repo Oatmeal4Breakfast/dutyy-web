@@ -242,12 +242,12 @@ Do not migrate feature behavior in this phase.
 Query can cancel superseded or abandoned reads only if its `AbortSignal`
 reaches `fetch`.
 
-- [ ] Allow read endpoint functions to accept an optional `AbortSignal`:
+- [x] Allow read endpoint functions to accept an optional `AbortSignal`:
   - Session restoration
   - Project list/detail
   - API-key list
-- [ ] Pass the signal through the existing `RequestInit` to `apiRequest`.
-- [ ] Add cancellation coverage.
+- [x] Pass the signal through the existing `RequestInit` to `apiRequest`.
+- [x] Add cancellation coverage.
 
 Do not create a second fetch wrapper or attempt to make mutations cancellable
 as part of this phase.
