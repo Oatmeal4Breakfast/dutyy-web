@@ -4,6 +4,7 @@ import { useMutation, useMutationState, useQuery, useQueryClient } from '@tansta
 import { deleteAPIKey, getApiKeys, type APIKeyResponse } from '../api/api';
 import { ApiError } from '../api/client';
 import { apiKeyKeys } from '../queries/queryKeys';
+import { isAuthenticatedUser } from '../queries/queryClient';
 
 type HistoryLoadResult = 'success' | 'failed';
 
@@ -45,7 +46,9 @@ export default function useApiKeyHistory(userId: string) {
   const refresh = useCallback(
     async (failureMessage = 'Unable to refresh API key history.'): Promise<HistoryLoadResult> => {
       setRefreshFailure(null);
+      if (!isAuthenticatedUser(queryClient, userId)) return 'failed';
       await queryClient.cancelQueries({ queryKey, exact: true });
+      if (!isAuthenticatedUser(queryClient, userId)) return 'failed';
 
       const result = await historyQuery.refetch();
       if (result.isError) {
@@ -58,7 +61,7 @@ export default function useApiKeyHistory(userId: string) {
 
       return 'success';
     },
-    [historyQuery, queryClient, queryKey],
+    [historyQuery, queryClient, queryKey, userId],
   );
 
   const retry = useCallback(async (): Promise<HistoryLoadResult> => {
@@ -74,6 +77,7 @@ export default function useApiKeyHistory(userId: string) {
       setRevokeError(null);
     },
     onSuccess: (_, key) => {
+      if (!isAuthenticatedUser(queryClient, userId)) return;
       queryClient.setQueryData<APIKeyResponse[]>(queryKey, (current) =>
         current?.map((currentKey) =>
           currentKey.id === key.id ? { ...currentKey, status: 'inactive' } : currentKey,
