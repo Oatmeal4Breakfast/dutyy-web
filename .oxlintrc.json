@@ -10,7 +10,7 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["dist"],
+  "ignorePatterns": ["dist", "docs/.opencode"],
   "rules": {},
   "overrides": [
     {

@@ -29,3 +29,6 @@ dist-ssr
 .env.*
 !.env.example
 !.env.*.example
+
+#Obsidian
+docs/.obsidian

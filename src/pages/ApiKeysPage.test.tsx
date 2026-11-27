@@ -220,6 +220,28 @@ describe('ApiKeysPage', () => {
     expect(screen.queryByRole('heading', { name: 'Your new API key' })).not.toBeInTheDocument();
   });
 
+  it('attempts a failed key issuance only once', async () => {
+    const user = userEvent.setup();
+    let issueRequests = 0;
+
+    server.use(
+      http.get(`${API}/api-keys`, () => HttpResponse.json([])),
+      http.post(`${API}/api-keys`, () => {
+        issueRequests += 1;
+        return HttpResponse.json({ detail: 'service unavailable' }, { status: 503 });
+      }),
+    );
+
+    render(<ApiKeysPage />);
+
+    await screen.findByText('No API keys have been issued yet.');
+    await user.type(screen.getByLabelText('Key name'), 'Laptop CLI');
+    await user.click(screen.getByRole('button', { name: 'Issue key' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('service unavailable');
+    expect(issueRequests).toBe(1);
+  });
+
   it('confirms and revokes an active key while retaining its history', async () => {
     const user = userEvent.setup();
     const activeKey = makeApiKey();
@@ -250,5 +272,78 @@ describe('ApiKeysPage', () => {
     expect(revokedId).toBe('api-key-1');
     expect(screen.getByText('Laptop CLI')).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Revoke Laptop CLI' })).not.toBeInTheDocument();
+  });
+
+  it('tracks concurrent revocations independently for each key', async () => {
+    const user = userEvent.setup();
+    const firstKey = makeApiKey();
+    const secondKey = makeApiKey({ id: 'api-key-2', name: 'Desktop CLI' });
+    const revokedIds = new Set<string>();
+    const requestedIds: string[] = [];
+    let releaseFirst!: () => void;
+    let releaseSecond!: () => void;
+    let markFirstStarted!: () => void;
+    let markSecondStarted!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const secondGate = new Promise<void>((resolve) => {
+      releaseSecond = resolve;
+    });
+    const firstStarted = new Promise<void>((resolve) => {
+      markFirstStarted = resolve;
+    });
+    const secondStarted = new Promise<void>((resolve) => {
+      markSecondStarted = resolve;
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    server.use(
+      http.get(`${API}/api-keys`, () =>
+        HttpResponse.json(
+          [firstKey, secondKey].map((key) =>
+            revokedIds.has(key.id) ? { ...key, status: 'inactive' } : key,
+          ),
+        ),
+      ),
+      http.delete(`${API}/api-keys/:keyId`, async ({ params }) => {
+        const keyId = String(params.keyId);
+        requestedIds.push(keyId);
+
+        if (keyId === firstKey.id) {
+          markFirstStarted();
+          await firstGate;
+        } else {
+          markSecondStarted();
+          await secondGate;
+        }
+
+        revokedIds.add(keyId);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    render(<ApiKeysPage />);
+
+    await user.click(await screen.findByRole('button', { name: 'Revoke Laptop CLI' }));
+    await firstStarted;
+    await user.click(screen.getByRole('button', { name: 'Revoke Desktop CLI' }));
+    await secondStarted;
+
+    expect(screen.getAllByRole('button', { name: 'Revoking...' })).toHaveLength(2);
+
+    releaseFirst();
+
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: 'Revoking...' })).toHaveLength(1),
+    );
+    expect(screen.getByRole('button', { name: 'Revoking...' })).toBeDisabled();
+
+    releaseSecond();
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Revoking...' })).toBeNull());
+    expect(requestedIds).toEqual(['api-key-1', 'api-key-2']);
+    expect(screen.getAllByText('Revoked')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: /Revoke (Laptop|Desktop) CLI/ })).toBeNull();
   });
 });

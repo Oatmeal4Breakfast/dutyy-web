@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router';
 
 import App from './App';
 import { clearEstablishedSession } from './api/client';
-import { makeSession } from './test/fixtures';
+import { makeProject, makeSession, makeUser } from './test/fixtures';
 import { server } from './test/server';
 
 const API = '*/dutyy/api/v1';
@@ -103,5 +103,60 @@ describe('App user and session state management', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid username or password');
     expect(screen.queryByText(SESSION_EXPIRED_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it('does not show the previous users projects after an account transition', async () => {
+    const user = userEvent.setup();
+    const firstUser = makeUser();
+    const secondUser = makeUser({
+      id: 'user-2',
+      first_name: 'Jane',
+      last_name: 'Smith',
+      email: 'jane.smith@example.com',
+    });
+    const firstProject = makeProject({ name: 'First user project' });
+    const secondProject = makeProject({
+      id: 'project-2',
+      name: 'Second user project',
+      owner_id: secondUser.id,
+      dutyys: [],
+    });
+    let activeUserId = firstUser.id;
+
+    server.use(
+      http.get(`${API}/auth/session`, () =>
+        HttpResponse.json(makeSession({ user_summary: firstUser }), {
+          headers: { 'X-CSRF-Token': 'test-csrf-token' },
+        }),
+      ),
+      http.get(`${API}/projects`, () =>
+        HttpResponse.json(activeUserId === firstUser.id ? [firstProject] : [secondProject]),
+      ),
+      http.post(`${API}/auth/logout`, () => {
+        activeUserId = secondUser.id;
+        return new HttpResponse(null, { status: 204 });
+      }),
+      http.post(`${API}/auth/login`, () =>
+        HttpResponse.json(
+          { user_summary: secondUser },
+          { headers: { 'X-CSRF-Token': 'next-csrf-token' } },
+        ),
+      ),
+    );
+
+    renderApp('/dashboard');
+
+    expect(await screen.findByText('First user project')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Logout' }));
+
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeVisible();
+    expect(screen.queryByText('First user project')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Email'), secondUser.email);
+    await user.type(screen.getByLabelText('Password'), 'correct-password');
+    await user.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    expect(await screen.findByText('Second user project')).toBeVisible();
+    expect(screen.queryByText('First user project')).not.toBeInTheDocument();
   });
 });
