@@ -16,6 +16,7 @@ import {
   type UpdateProjectRequest,
 } from '../api/projects';
 import { projectKeys } from '../queries/queryKeys';
+import { isAuthenticatedUser } from '../queries/queryClient';
 
 const PROJECTS_REFRESH_ERROR =
   'The project list could not be refreshed. Displayed data may be out of date.';
@@ -36,12 +37,14 @@ export default function useProjects(userId: string) {
   });
 
   function reconcileProjects(): void {
+    if (!isAuthenticatedUser(queryClient, userId)) return;
     void queryClient.invalidateQueries({ queryKey, exact: true });
   }
 
   const createProjectMutation = useMutation({
     mutationFn: (payload: CreateProjectRequest) => createProject(payload),
     onSuccess: (createdProject) => {
+      if (!isAuthenticatedUser(queryClient, userId)) return;
       queryClient.setQueryData<Project[]>(queryKey, (current) => [
         ...(current?.filter((project) => project.id !== createdProject.id) ?? []),
         createdProject,
@@ -94,6 +97,7 @@ export default function useProjects(userId: string) {
   const removeProjectMutation = useMutation({
     mutationFn: (projectId: string) => deleteProject(projectId),
     onSuccess: (_, projectId) => {
+      if (!isAuthenticatedUser(queryClient, userId)) return;
       queryClient.setQueryData<Project[]>(queryKey, (current) =>
         current?.filter((project) => project.id !== projectId),
       );

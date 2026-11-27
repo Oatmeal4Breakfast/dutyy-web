@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router';
 import './App.css';
 import { restoreSession } from './api/auth';
@@ -12,39 +13,28 @@ import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SetPasswordPage from './pages/SetPasswordPage';
 import ApiKeysPage from './pages/ApiKeysPage';
+import { removeUserScopedQueries } from './queries/queryClient';
+import { sessionKeys } from './queries/queryKeys';
 
 function App() {
-  const [user, setUser] = useState<UserSummary | null>(null);
-  const [checkingSession, setCheckingSession] = useState(true);
+  const queryClient = useQueryClient();
   const [sessionExpired, setSessionExpired] = useState(false);
+  const sessionQuery = useQuery({
+    queryKey: sessionKeys.all,
+    queryFn: async ({ signal }) => (await restoreSession(signal)).user_summary,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const user = sessionQuery.data ?? null;
+  const checkingSession = sessionQuery.isPending && sessionQuery.fetchStatus !== 'paused';
 
   useEffect(() => {
     return registerSessionExpiredHandler(() => {
+      removeUserScopedQueries(queryClient);
+      queryClient.setQueryData<UserSummary | null>(sessionKeys.all, null);
       setSessionExpired(true);
-      setUser(null);
     });
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    async function checkSession() {
-      try {
-        const session = await restoreSession();
-        if (active) setUser(session.user_summary);
-      } catch {
-        if (active) setUser(null);
-      } finally {
-        if (active) setCheckingSession(false);
-      }
-    }
-
-    void checkSession();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  }, [queryClient]);
 
   if (checkingSession) {
     return (
@@ -55,13 +45,19 @@ function App() {
   }
 
   function handleLogin(user: UserSummary) {
+    removeUserScopedQueries(queryClient);
+    queryClient.setQueryData(sessionKeys.all, user);
     setSessionExpired(false);
-    setUser(user);
+  }
+
+  function handleLogout() {
+    removeUserScopedQueries(queryClient);
+    queryClient.setQueryData<UserSummary | null>(sessionKeys.all, null);
   }
 
   return (
     <>
-      <NavBar user={user} onLogout={() => setUser(null)} />
+      <NavBar user={user} onLogout={handleLogout} />
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
         <Route

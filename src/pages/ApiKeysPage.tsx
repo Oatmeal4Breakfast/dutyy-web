@@ -1,6 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
+
 import ApiKeyHistory from '../components/ApiKeyHistory';
 import ApiKeyIssuePanel from '../components/ApiKeyIssuePanel';
 import useApiKeyHistory from '../hooks/useApiKeyHistory';
+import { isAuthenticatedUser } from '../queries/queryClient';
 import './ApiKeysPage.css';
 
 type ApiKeysPageProps = {
@@ -8,6 +11,7 @@ type ApiKeysPageProps = {
 };
 
 export default function ApiKeysPage({ userId }: ApiKeysPageProps) {
+  const queryClient = useQueryClient();
   const history = useApiKeyHistory(userId);
 
   return (
@@ -23,6 +27,7 @@ export default function ApiKeysPage({ userId }: ApiKeysPageProps) {
 
       <ApiKeyIssuePanel
         onIssued={() => {
+          if (!isAuthenticatedUser(queryClient, userId)) return;
           void history.refresh(
             'The API key was issued, but the key history could not be refreshed.',
           );

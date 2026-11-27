@@ -1,11 +1,12 @@
 import { onlineManager } from '@tanstack/react-query';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 
-import { projectKeys } from '../queries/queryKeys';
-import { makeDutyy, makeProject } from '../test/fixtures';
-import { renderWithQueryClient } from '../test/renderWithQueryClient';
+import { removeUserScopedQueries } from '../queries/queryClient';
+import { projectKeys, sessionKeys } from '../queries/queryKeys';
+import { makeDutyy, makeProject, makeUser } from '../test/fixtures';
+import { createTestQueryClient, renderWithQueryClient } from '../test/renderWithQueryClient';
 import { server } from '../test/server';
 import DashboardPage from './DashboardPage';
 
@@ -14,7 +15,9 @@ const USER_ID = 'user-1';
 const REFRESH_ERROR = 'The project list could not be refreshed. Displayed data may be out of date.';
 
 function renderPage() {
-  return renderWithQueryClient(<DashboardPage userId={USER_ID} />);
+  const queryClient = createTestQueryClient();
+  queryClient.setQueryData(sessionKeys.all, makeUser({ id: USER_ID }));
+  return renderWithQueryClient(<DashboardPage userId={USER_ID} />, { queryClient });
 }
 
 describe('DashboardPage project synchronization', () => {
@@ -250,5 +253,44 @@ describe('DashboardPage project synchronization', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(REFRESH_ERROR);
     expect(queryClient.getQueryData(projectKeys.list(USER_ID))).toEqual([]);
     expect(deleteRequests).toBe(1);
+  });
+
+  it('does not recreate project data when a mutation finishes after authentication cleanup', async () => {
+    const user = userEvent.setup();
+    const createdProject = makeProject({ id: 'project-late', name: 'Late project', dutyys: [] });
+    let releaseCreate!: () => void;
+    let markCreateStarted!: () => void;
+    const createGate = new Promise<void>((resolve) => {
+      releaseCreate = resolve;
+    });
+    const createStarted = new Promise<void>((resolve) => {
+      markCreateStarted = resolve;
+    });
+
+    server.use(
+      http.get(`${API}/projects`, () => HttpResponse.json([])),
+      http.post(`${API}/projects`, async () => {
+        markCreateStarted();
+        await createGate;
+        return HttpResponse.json(createdProject, { status: 201 });
+      }),
+    );
+
+    const { queryClient, unmount } = renderPage();
+
+    await screen.findByText('No projects yet.');
+    await user.click(screen.getByRole('button', { name: 'New Project' }));
+    await user.type(screen.getByLabelText('Project Name'), createdProject.name);
+    await user.click(screen.getByRole('button', { name: 'Create Project' }));
+    await createStarted;
+
+    removeUserScopedQueries(queryClient);
+    queryClient.setQueryData(sessionKeys.all, null);
+    unmount();
+    releaseCreate();
+
+    await waitFor(() => {
+      expect(queryClient.getQueriesData({ queryKey: projectKeys.all })).toEqual([]);
+    });
   });
 });

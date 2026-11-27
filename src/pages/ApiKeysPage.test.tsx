@@ -1,9 +1,10 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { apiKeyKeys } from '../queries/queryKeys';
-import { makeApiKey } from '../test/fixtures';
-import { renderWithQueryClient } from '../test/renderWithQueryClient';
+import { removeUserScopedQueries } from '../queries/queryClient';
+import { apiKeyKeys, sessionKeys } from '../queries/queryKeys';
+import { makeApiKey, makeUser } from '../test/fixtures';
+import { createTestQueryClient, renderWithQueryClient } from '../test/renderWithQueryClient';
 import { server } from '../test/server';
 import ApiKeysPage from './ApiKeysPage';
 
@@ -12,7 +13,9 @@ const USER_ID = 'user-1';
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
 
 function renderPage() {
-  return renderWithQueryClient(<ApiKeysPage userId={USER_ID} />);
+  const queryClient = createTestQueryClient();
+  queryClient.setQueryData(sessionKeys.all, makeUser({ id: USER_ID }));
+  return renderWithQueryClient(<ApiKeysPage userId={USER_ID} />, { queryClient });
 }
 
 describe('ApiKeysPage', () => {
@@ -384,5 +387,42 @@ describe('ApiKeysPage', () => {
     expect(requestedIds).toEqual(['api-key-1', 'api-key-2']);
     expect(screen.getAllByText('Revoked')).toHaveLength(2);
     expect(screen.queryByRole('button', { name: /Revoke (Laptop|Desktop) CLI/ })).toBeNull();
+  });
+
+  it('does not recreate API-key data when a revocation finishes after authentication cleanup', async () => {
+    const user = userEvent.setup();
+    const activeKey = makeApiKey();
+    let releaseRevoke!: () => void;
+    let markRevokeStarted!: () => void;
+    const revokeGate = new Promise<void>((resolve) => {
+      releaseRevoke = resolve;
+    });
+    const revokeStarted = new Promise<void>((resolve) => {
+      markRevokeStarted = resolve;
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    server.use(
+      http.get(`${API}/api-keys`, () => HttpResponse.json([activeKey])),
+      http.delete(`${API}/api-keys/:keyId`, async () => {
+        markRevokeStarted();
+        await revokeGate;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const { queryClient, unmount } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Revoke Laptop CLI' }));
+    await revokeStarted;
+
+    removeUserScopedQueries(queryClient);
+    queryClient.setQueryData(sessionKeys.all, null);
+    unmount();
+    releaseRevoke();
+
+    await waitFor(() => {
+      expect(queryClient.getQueriesData({ queryKey: apiKeyKeys.all })).toEqual([]);
+    });
   });
 });
